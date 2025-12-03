@@ -128,8 +128,11 @@ export default function Gallery() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero py-20 lg:py-28">
+      <section className="relative overflow-hidden bg-gradient-hero pb-24 pt-20 lg:pb-28 lg:pt-28">
         <div className="absolute inset-0 bg-hero-pattern opacity-50" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-primary-light/20 blur-3xl" />
+        
         <div className="container relative">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl">
@@ -141,9 +144,14 @@ export default function Gallery() {
             </p>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 100" fill="none" className="w-full">
-            <path d="M0 100V50C240 16.67 480 0 720 0C960 0 1200 16.67 1440 50V100H0Z" fill="hsl(var(--background))" />
+        
+        {/* Decorative wave */}
+        <div className="absolute bottom-0 left-0 right-0 -mb-px">
+          <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="block h-[100px] w-full">
+            <path
+              d="M0 100V50C240 16.67 480 0 720 0C960 0 1200 16.67 1440 50V100H0Z"
+              fill="hsl(var(--background))"
+            />
           </svg>
         </div>
       </section>
@@ -179,7 +187,6 @@ export default function Gallery() {
                 onClick={() => openLightbox(index)}
                 className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20 to-secondary/20"
               >
-                {/* Placeholder for actual images */}
                 <div className="flex h-full flex-col items-center justify-center p-4 text-center">
                   {item.type === "video" ? (
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
@@ -191,7 +198,6 @@ export default function Gallery() {
                   <p className="mt-4 text-sm font-medium text-foreground">{item.title}</p>
                 </div>
                 
-                {/* Overlay */}
                 <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/80 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                   <h3 className="font-heading text-lg font-bold text-primary-foreground">
                     {item.title}

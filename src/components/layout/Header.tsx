@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Heart, ChevronDown } from "lucide-react";
+import { Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -21,15 +21,15 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between lg:h-20">
-        {/* Logo */}
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
+        {/* Logo - Always shows logo and name */}
         <Link to="/" className="flex items-center gap-2 font-heading text-xl font-bold">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-hero">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-hero shrink-0">
             <span className="text-lg font-bold text-primary-foreground">E</span>
           </div>
-          <span className="hidden sm:inline">
-            <span className="text-primary">Edans</span>
-            <span className="text-secondary"> Impact</span>
+          <span className="flex items-center">
+            <span className="text-primary">EDANS</span>
+            <span className="text-secondary ml-1">IMPACT</span>
           </span>
         </Link>
 
@@ -81,7 +81,7 @@ export function Header() {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="border-t border-border lg:hidden">
-          <nav className="container flex flex-col gap-2 py-4">
+          <nav className="flex flex-col gap-2 py-4 px-4 sm:px-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}

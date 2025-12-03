@@ -61,8 +61,8 @@ export function Footer() {
                 <span className="text-lg font-bold text-primary-foreground">E</span>
               </div>
               <span>
-                <span className="text-primary">Edans</span>
-                <span className="text-secondary"> Impact</span>
+                <span className="text-primary">EDANS</span>
+                <span className="text-secondary"> IMPACT</span>
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">

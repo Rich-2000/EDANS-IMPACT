@@ -93,8 +93,11 @@ export default function Events() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero py-20 lg:py-28">
+      <section className="relative overflow-hidden bg-gradient-hero pb-24 pt-20 lg:pb-28 lg:pt-28">
         <div className="absolute inset-0 bg-hero-pattern opacity-50" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-primary-light/20 blur-3xl" />
+        
         <div className="container relative">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl">
@@ -106,9 +109,14 @@ export default function Events() {
             </p>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 100" fill="none" className="w-full">
-            <path d="M0 100V50C240 16.67 480 0 720 0C960 0 1200 16.67 1440 50V100H0Z" fill="hsl(var(--background))" />
+        
+        {/* Decorative wave */}
+        <div className="absolute bottom-0 left-0 right-0 -mb-px">
+          <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="block h-[100px] w-full">
+            <path
+              d="M0 100V50C240 16.67 480 0 720 0C960 0 1200 16.67 1440 50V100H0Z"
+              fill="hsl(var(--background))"
+            />
           </svg>
         </div>
       </section>

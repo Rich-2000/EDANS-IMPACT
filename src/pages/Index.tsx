@@ -67,7 +67,7 @@ export default function Index() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero py-20 lg:py-32">
+      <section className="relative overflow-hidden bg-gradient-hero pb-24 pt-20 lg:pb-28 lg:pt-28">
         <div className="absolute inset-0 bg-hero-pattern opacity-50" />
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" />
         <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-primary-light/20 blur-3xl" />
@@ -111,8 +111,8 @@ export default function Index() {
         </div>
         
         {/* Decorative wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 100" fill="none" className="w-full">
+        <div className="absolute bottom-0 left-0 right-0 -mb-px">
+          <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="block h-[100px] w-full">
             <path
               d="M0 100V50C240 16.67 480 0 720 0C960 0 1200 16.67 1440 50V100H0Z"
               fill="hsl(var(--background))"
