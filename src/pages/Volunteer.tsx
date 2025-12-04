@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import emailjs from "@emailjs/browser";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,11 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react";
+
+// EmailJS Configuration
+const EMAILJS_SERVICE_ID = "service_7jp0flp";
+const EMAILJS_VOLUNTEER_TEMPLATE_ID = "template_46pssq6";
+const EMAILJS_PUBLIC_KEY = "eU3ZuZL7r67CTtTF3";
 
 const benefits = [
   {
@@ -101,9 +107,52 @@ export default function Volunteer() {
     selectedRoles: [] as string[],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Validate if form is complete and valid
+  const isFormValid = useMemo(() => {
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      location, 
+      availability, 
+      motivation,
+      selectedSkills,
+      selectedRoles
+    } = formData;
+    
+    // Check if all required fields are filled
+    const hasRequiredFields = 
+      firstName.trim() !== "" && 
+      lastName.trim() !== "" && 
+      email.trim() !== "" && 
+      phone.trim() !== "" && 
+      location.trim() !== "" && 
+      availability !== "" && 
+      motivation.trim() !== "" &&
+      selectedSkills.length > 0 &&
+      selectedRoles.length > 0;
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailValid = emailRegex.test(email);
+    
+    // Validate motivation length (minimum 20 characters)
+    const isMotivationValid = motivation.trim().length >= 20;
+    
+    return hasRequiredFields && isEmailValid && isMotivationValid;
+  }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors({ ...formErrors, [name]: "" });
+    }
   };
 
   const handleSkillToggle = (skill: string) => {
@@ -124,35 +173,137 @@ export default function Volunteer() {
     }));
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+    
+    if (!formData.lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = "Email address is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = "Please enter a valid email address";
+      }
+    }
+    
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone number is required";
+    }
+    
+    if (!formData.location.trim()) {
+      errors.location = "Location is required";
+    }
+    
+    if (!formData.availability) {
+      errors.availability = "Please select your availability";
+    }
+    
+    if (!formData.motivation.trim()) {
+      errors.motivation = "Please tell us your motivation";
+    } else if (formData.motivation.trim().length < 20) {
+      errors.motivation = "Please provide at least 20 characters";
+    }
+    
+    if (formData.selectedSkills.length === 0) {
+      errors.selectedSkills = "Please select at least one skill";
+    }
+    
+    if (formData.selectedRoles.length === 0) {
+      errors.selectedRoles = "Please select at least one role";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+        duration: 4000, // Auto-dismiss after 4 seconds
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Application Submitted!",
-      description: "Thank you for your interest in volunteering. We'll be in touch soon!",
-    });
-    
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      location: "",
-      occupation: "",
-      motivation: "",
-      availability: "",
-      selectedSkills: [],
-      selectedRoles: [],
-    });
-    setIsSubmitting(false);
+    try {
+      // Initialize EmailJS with your public key
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+
+      // Prepare template parameters
+      const templateParams = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        fullName: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        occupation: formData.occupation || "Not provided",
+        availability: formData.availability,
+        motivation: formData.motivation,
+        skills: formData.selectedSkills.join(", "),
+        roles: formData.selectedRoles.join(", "),
+      };
+
+      // Send email using EmailJS
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_VOLUNTEER_TEMPLATE_ID,
+        templateParams
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: "Application Submitted Successfully! ✓",
+          description: "Thank you for your interest in volunteering. We'll review your application and contact you within 48 hours.",
+          variant: "default",
+          duration: 5000, // Auto-dismiss after 5 seconds
+        });
+        
+        // Reset form
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          location: "",
+          occupation: "",
+          motivation: "",
+          availability: "",
+          selectedSkills: [],
+          selectedRoles: [],
+        });
+        setFormErrors({});
+      }
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      toast({
+        title: "Error Submitting Application",
+        description: "Something went wrong. Please try again or contact us directly at edansimpact@gmail.com",
+        variant: "destructive",
+        duration: 6000, // Auto-dismiss after 6 seconds (longer for error messages)
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Layout>
-      {/* Hero Section - Exact same design as about.tsx */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-hero pb-24 pt-20 lg:pb-28 lg:pt-28">
         <div className="absolute inset-0 bg-hero-pattern opacity-50" />
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" />
@@ -170,7 +321,7 @@ export default function Volunteer() {
           </div>
         </div>
         
-        {/* Decorative wave - Exact same as about.tsx */}
+        {/* Decorative wave */}
         <div className="absolute bottom-0 left-0 right-0 -mb-px">
           <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="block h-[100px] w-full">
             <path
@@ -276,61 +427,86 @@ export default function Volunteer() {
                   </h3>
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="firstName">First Name *</Label>
+                      <Label htmlFor="firstName">
+                        First Name <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="firstName"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.firstName ? 'border-red-500' : ''}`}
+                        placeholder="John"
                       />
+                      {formErrors.firstName && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.firstName}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Label htmlFor="lastName">
+                        Last Name <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="lastName"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.lastName ? 'border-red-500' : ''}`}
+                        placeholder="Doe"
                       />
+                      {formErrors.lastName && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.lastName}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email">
+                        Email <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.email ? 'border-red-500' : ''}`}
+                        placeholder="john@example.com"
                       />
+                      {formErrors.email && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone">
+                        Phone Number <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="phone"
                         name="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.phone ? 'border-red-500' : ''}`}
+                        placeholder="+233 XX XXX XXXX"
                       />
+                      {formErrors.phone && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="location">Location (City/Region) *</Label>
+                      <Label htmlFor="location">
+                        Location (City/Region) <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="location"
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.location ? 'border-red-500' : ''}`}
+                        placeholder="e.g., Kumasi, Ashanti"
                       />
+                      {formErrors.location && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.location}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="occupation">Occupation</Label>
@@ -340,6 +516,7 @@ export default function Volunteer() {
                         value={formData.occupation}
                         onChange={handleChange}
                         className="mt-2"
+                        placeholder="e.g., Teacher, Engineer"
                       />
                     </div>
                   </div>
@@ -348,7 +525,7 @@ export default function Volunteer() {
                 {/* Skills */}
                 <div>
                   <h3 className="font-heading text-lg font-bold text-foreground">
-                    Skills & Expertise
+                    Skills & Expertise <span className="text-red-500">*</span>
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Select all that apply
@@ -369,12 +546,15 @@ export default function Volunteer() {
                       </button>
                     ))}
                   </div>
+                  {formErrors.selectedSkills && (
+                    <p className="mt-2 text-sm text-red-500">{formErrors.selectedSkills}</p>
+                  )}
                 </div>
                 
                 {/* Roles */}
                 <div>
                   <h3 className="font-heading text-lg font-bold text-foreground">
-                    Preferred Roles
+                    Preferred Roles <span className="text-red-500">*</span>
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Select the roles you're interested in
@@ -400,6 +580,9 @@ export default function Volunteer() {
                       </label>
                     ))}
                   </div>
+                  {formErrors.selectedRoles && (
+                    <p className="mt-2 text-sm text-red-500">{formErrors.selectedRoles}</p>
+                  )}
                 </div>
                 
                 {/* Availability & Motivation */}
@@ -409,14 +592,15 @@ export default function Volunteer() {
                   </h3>
                   <div className="mt-4 space-y-4">
                     <div>
-                      <Label htmlFor="availability">Your Availability *</Label>
+                      <Label htmlFor="availability">
+                        Your Availability <span className="text-red-500">*</span>
+                      </Label>
                       <select
                         id="availability"
                         name="availability"
                         value={formData.availability}
                         onChange={handleChange}
-                        required
-                        className="mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className={`mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${formErrors.availability ? 'border-red-500' : ''}`}
                       >
                         <option value="">Select your availability</option>
                         <option value="weekdays">Weekdays</option>
@@ -424,18 +608,25 @@ export default function Volunteer() {
                         <option value="evenings">Evenings only</option>
                         <option value="flexible">Flexible</option>
                       </select>
+                      {formErrors.availability && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.availability}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="motivation">Why do you want to volunteer with us? *</Label>
+                      <Label htmlFor="motivation">
+                        Why do you want to volunteer with us? <span className="text-red-500">*</span>
+                      </Label>
                       <Textarea
                         id="motivation"
                         name="motivation"
                         value={formData.motivation}
                         onChange={handleChange}
-                        required
-                        className="mt-2 min-h-[120px]"
-                        placeholder="Tell us about your motivation and what you hope to contribute..."
+                        className={`mt-2 min-h-[120px] ${formErrors.motivation ? 'border-red-500' : ''}`}
+                        placeholder="Tell us about your motivation and what you hope to contribute... (minimum 20 characters)"
                       />
+                      {formErrors.motivation && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.motivation}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -446,10 +637,10 @@ export default function Volunteer() {
                 variant="hero"
                 size="xl"
                 className="mt-8 w-full"
-                disabled={isSubmitting}
+                disabled={!isFormValid || isSubmitting}
               >
                 {isSubmitting ? (
-                  "Submitting..."
+                  "Submitting Application..."
                 ) : (
                   <>
                     Submit Application
@@ -457,6 +648,12 @@ export default function Volunteer() {
                   </>
                 )}
               </Button>
+              
+              {!isFormValid && (
+                <p className="mt-2 text-center text-sm text-muted-foreground">
+                  Please fill in all required fields to submit your application
+                </p>
+              )}
             </form>
           </div>
         </div>

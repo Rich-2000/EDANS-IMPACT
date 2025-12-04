@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import emailjs from "@emailjs/browser";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,23 +16,27 @@ import {
   Users
 } from "lucide-react";
 
+const EMAILJS_SERVICE_ID = "service_7jp0flp";
+const EMAILJS_TEMPLATE_ID = "template_6tsca06";
+const EMAILJS_PUBLIC_KEY = "eU3ZuZL7r67CTtTF3"; 
+
 const contactInfo = [
   {
     icon: Mail,
     title: "Email",
-    details: "info@edansimpact.org",
+    details: "edansimpact@gmail.com",
     description: "Send us an email anytime",
   },
   {
     icon: Phone,
     title: "Phone",
-    details: "+233 XX XXX XXXX",
+    details: "+233 59 728 8208",
     description: "Mon-Fri from 8am to 5pm",
   },
   {
     icon: MapPin,
     title: "Office",
-    details: "Accra, Ghana",
+    details: "Kumasi, Ashanti Region, Ghana",
     description: "Visit us at our headquarters",
   },
   {
@@ -62,31 +67,157 @@ export default function Contact() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeEmail, setSubscribeEmail] = useState("");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Validate if form is complete and valid
+  const isFormValid = useMemo(() => {
+    const { name, email, inquiryType, message } = formData;
+    
+    // Check if all required fields are filled
+    const hasRequiredFields = name.trim() !== "" && 
+                             email.trim() !== "" && 
+                             inquiryType !== "" && 
+                             message.trim() !== "";
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailValid = emailRegex.test(email);
+    
+    return hasRequiredFields && isEmailValid;
+  }, [formData]);
+
+  // Validate if subscribe email is valid
+  const isSubscribeValid = useMemo(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return subscribeEmail.trim() !== "" && emailRegex.test(subscribeEmail);
+  }, [subscribeEmail]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors({ ...formErrors, [name]: "" });
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      errors.name = "Full name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = "Email address is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = "Please enter a valid email address";
+      }
+    }
+    
+    if (!formData.inquiryType) {
+      errors.inquiryType = "Please select an inquiry type";
+    }
+    
+    if (!formData.message.trim()) {
+      errors.message = "Message is required";
+    } else if (formData.message.trim().length < 10) {
+      errors.message = "Message must be at least 10 characters";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Initialize EmailJS with your public key
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+
+      // Prepare template parameters
+      const templateParams = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || "Not provided",
+        organization: formData.organization || "Not provided",
+        inquiryType: inquiryTypes.find(type => type.value === formData.inquiryType)?.label || formData.inquiryType,
+        message: formData.message,
+      };
+
+      // Send email using EmailJS
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: "Message Sent Successfully! ✓",
+          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+          variant: "default",
+        });
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          organization: "",
+          inquiryType: "",
+          message: "",
+        });
+        setFormErrors({});
+      }
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      toast({
+        title: "Error Sending Message",
+        description: "Something went wrong. Please try again or contact us directly at edansimpact@gmail.com",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-    });
-    
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      organization: "",
-      inquiryType: "",
-      message: "",
-    });
-    setIsSubmitting(false);
+    if (isSubscribeValid) {
+      toast({
+        title: "Thank You for Subscribing! 🎉",
+        description: `You'll receive our latest updates and news at ${subscribeEmail}`,
+        variant: "default",
+      });
+      
+      // Reset subscribe email
+      setSubscribeEmail("");
+    } else {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -183,32 +314,40 @@ export default function Contact() {
               </div>
               
               <div className="lg:col-span-3">
-                <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 shadow-md lg:p-8">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-md lg:p-8">
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="name">
+                        Full Name <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="name"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.name ? 'border-red-500' : ''}`}
                         placeholder="John Doe"
                       />
+                      {formErrors.name && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
+                      )}
                     </div>
                     <div>
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="email">
+                        Email Address <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
-                        className="mt-2"
+                        className={`mt-2 ${formErrors.email ? 'border-red-500' : ''}`}
                         placeholder="john@example.com"
                       />
+                      {formErrors.email && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone Number</Label>
@@ -234,14 +373,15 @@ export default function Contact() {
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <Label htmlFor="inquiryType">Inquiry Type *</Label>
+                      <Label htmlFor="inquiryType">
+                        Inquiry Type <span className="text-red-500">*</span>
+                      </Label>
                       <select
                         id="inquiryType"
                         name="inquiryType"
                         value={formData.inquiryType}
                         onChange={handleChange}
-                        required
-                        className="mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className={`mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${formErrors.inquiryType ? 'border-red-500' : ''}`}
                       >
                         <option value="">Select an option</option>
                         {inquiryTypes.map((type) => (
@@ -250,27 +390,35 @@ export default function Contact() {
                           </option>
                         ))}
                       </select>
+                      {formErrors.inquiryType && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.inquiryType}</p>
+                      )}
                     </div>
                     <div className="sm:col-span-2">
-                      <Label htmlFor="message">Message *</Label>
+                      <Label htmlFor="message">
+                        Message <span className="text-red-500">*</span>
+                      </Label>
                       <Textarea
                         id="message"
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
-                        required
-                        className="mt-2 min-h-[150px]"
-                        placeholder="Tell us how we can help..."
+                        className={`mt-2 min-h-[150px] ${formErrors.message ? 'border-red-500' : ''}`}
+                        placeholder="Tell us how we can help... (minimum 10 characters)"
                       />
+                      {formErrors.message && (
+                        <p className="mt-1 text-sm text-red-500">{formErrors.message}</p>
+                      )}
                     </div>
                   </div>
                   
                   <Button
-                    type="submit"
+                    type="button"
                     variant="primary-gradient"
                     size="lg"
                     className="mt-6 w-full"
-                    disabled={isSubmitting}
+                    disabled={!isFormValid || isSubmitting}
+                    onClick={handleSubmit}
                   >
                     {isSubmitting ? (
                       "Sending..."
@@ -281,26 +429,68 @@ export default function Contact() {
                       </>
                     )}
                   </Button>
-                </form>
+                  
+                  {!isFormValid && (
+                    <p className="mt-2 text-center text-sm text-muted-foreground">
+                      Please fill in all required fields to send your message
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Map Section */}
+      {/* Google Map Section */}
       <section className="py-16 lg:py-24">
         <div className="container">
-          <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-secondary/10 shadow-md">
-            <div className="flex aspect-video items-center justify-center">
-              <div className="text-center">
-                <MapPin className="mx-auto h-16 w-16 text-primary" />
-                <h3 className="mt-4 font-heading text-xl font-bold text-foreground">
-                  Visit Our Office
-                </h3>
-                <p className="mt-2 text-muted-foreground">
-                  Accra, Ghana
-                </p>
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8 text-center">
+              <h2 className="font-heading text-3xl font-bold text-foreground">
+                Visit Our Office
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Find us in Kumasi, Ashanti Region, Ghana
+              </p>
+            </div>
+            
+            <div className="overflow-hidden rounded-2xl border border-border shadow-md">
+              {/* Google Map Embed - Kumasi, Ghana */}
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126293.03252209946!2d-1.6919133!3d6.6885073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdb96f342e6b639%3A0xb5f3a81cf7cc28cd!2sKumasi%2C%20Ghana!5e0!3m2!1sen!2sus!4v1733334000000!5m2!1sen!2sus"
+                width="100%"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Edan's Impact Office Location - Kumasi, Ashanti Region, Ghana"
+              />
+            </div>
+            
+            {/* Contact Details Below Map */}
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <div className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-sm">
+                <MapPin className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Address</h4>
+                  <p className="text-sm text-muted-foreground">Kumasi, Ashanti Region, Ghana</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-sm">
+                <Mail className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Email</h4>
+                  <p className="text-sm text-muted-foreground">edansimpact@gmail.com</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-sm">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Phone</h4>
+                  <p className="text-sm text-muted-foreground">+233 59 728 8208</p>
+                </div>
               </div>
             </div>
           </div>

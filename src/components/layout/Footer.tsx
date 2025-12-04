@@ -1,7 +1,20 @@
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, Heart } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube,
+} from "lucide-react";
+
+import { TiktokIcon } from "@/components/icons/TiktokIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const quickLinks = [
   { label: "About Us", href: "/about" },
@@ -19,14 +32,43 @@ const getInvolved = [
 ];
 
 const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Facebook, href: "https://www.facebook.com/share/1MH2DSTEmr/?mibextid=wwXIfr", label: "Facebook" },
+  { icon: Twitter, href: "https://x.com/edansimpact?s=21", label: "Twitter" },
+  { icon: Instagram, href: "https://www.instagram.com/edansimpact?igsh=OGw1ZWlmNmJydDk0&utm_source=qr", label: "Instagram" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/edans-impact-4711453a0?utm_source=share_via&utm_content=profile&utm_medium=member_ios", label: "LinkedIn" },
+  { icon: Youtube, href: "https://www.youtube.com/@edansimpact", label: "YouTube" },
+  { icon: TiktokIcon, href: "https://www.tiktok.com/@edans.impact?_r=1&_t=ZM-91wTjnFcmzc", label: "TikTok" }, 
 ];
 
 export function Footer() {
+  const { toast } = useToast();
+  const [subscribeEmail, setSubscribeEmail] = useState("");
+
+  const isSubscribeValid = useMemo(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return subscribeEmail.trim() !== "" && emailRegex.test(subscribeEmail);
+  }, [subscribeEmail]);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isSubscribeValid) {
+      toast({
+        title: "Thank You for Subscribing! 🎉",
+        description: `You'll receive our latest updates and news at ${subscribeEmail}`,
+        variant: "default",
+      });
+
+      setSubscribeEmail("");
+    } else {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <footer className="border-t border-border bg-gradient-subtle">
       {/* Newsletter Section */}
@@ -39,13 +81,31 @@ export function Footer() {
             <p className="mt-2 text-muted-foreground">
               Subscribe to our newsletter for the latest news, events, and impact stories.
             </p>
-            <form className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-2">
+
+            <form
+              className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-2"
+              onSubmit={handleSubscribe}
+            >
               <Input
                 type="email"
                 placeholder="Enter your email"
+                value={subscribeEmail}
+                onChange={(e) => setSubscribeEmail(e.target.value)}
                 className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && isSubscribeValid) {
+                    handleSubscribe(e);
+                  }
+                }}
               />
-              <Button variant="primary-gradient">Subscribe</Button>
+
+              <Button
+                type="submit"
+                variant="primary-gradient"
+                disabled={!isSubscribeValid}
+              >
+                Subscribe
+              </Button>
             </form>
           </div>
         </div>
@@ -54,6 +114,7 @@ export function Footer() {
       {/* Main Footer */}
       <div className="container py-12 lg:py-16">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          
           {/* About */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 font-heading text-xl font-bold">
@@ -68,15 +129,17 @@ export function Footer() {
             <p className="mt-4 text-sm text-muted-foreground">
               Empowering less-privileged students in Ghana through innovation, creativity, and educational opportunities.
             </p>
+
             <div className="mt-6 flex gap-3">
-              {socialLinks.map((social) => (
+              {socialLinks.map((s) => (
                 <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground
+                             transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
-                  <social.icon className="h-4 w-4" />
+                  <s.icon className="h-4 w-4" />
                 </a>
               ))}
             </div>
@@ -118,38 +181,19 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-heading font-semibold text-foreground">Contact Us</h4>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>Accra, Ghana</span>
+            <h4 className="font-heading font-semibold text-foreground">Contact</h4>
+            <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" /> edansimpact@gmail.com
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 shrink-0 text-primary" />
-                <a href="mailto:info@edansimpact.org" className="hover:text-primary">
-                  info@edansimpact.org
-                </a>
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" /> +233 59 728 8208
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4 shrink-0 text-primary" />
-                <a href="tel:+233000000000" className="hover:text-primary">
-                  +233 XX XXX XXXX
-                </a>
+              <li className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" /> Kumasi, Ghana
               </li>
             </ul>
           </div>
-        </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-border">
-        <div className="container flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
-          <p className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Edans Impact. All rights reserved.
-          </p>
-          <p className="flex items-center gap-1 text-sm text-muted-foreground">
-            Made with <Heart className="h-4 w-4 fill-destructive text-destructive" /> for Ghana's youth
-          </p>
         </div>
       </div>
     </footer>
