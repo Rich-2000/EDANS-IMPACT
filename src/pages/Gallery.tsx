@@ -10,10 +10,26 @@ import {
   Video
 } from "lucide-react";
 
+// Import your images from assets folder
+import image1 from '../assets/images/innovation-summit.jpg';
+import image2 from '../assets/images/stem-workshop.jpg';
+import image3 from '../assets/images/community-outreach.jpg';
+import image4 from '../assets/images/leadership-training.jpg';
+import image5 from '../assets/images/award-ceremony.jpg';
+import image6 from '../assets/images/environmental-project.jpg';
+import image7 from '../assets/images/volunteer-team.jpg';
+import image8 from '../assets/images/creative-arts.jpg';
+import image9 from '../assets/images/environment-project-2.jpg';
+import image10 from '../assets/images/career-fair.jpg';
+import image11 from '../assets/images/student-success.jpg';
+// Import your video
+import video1 from '../assets/videos/student-success.mp4';
+
 const galleryItems = [
   {
     id: 1,
     type: "image",
+    src: image1,
     title: "Innovation Summit 2023",
     description: "Students presenting their projects at the annual Innovation Summit",
     category: "Events",
@@ -21,6 +37,7 @@ const galleryItems = [
   {
     id: 2,
     type: "image",
+    src: image2,
     title: "STEM Workshop",
     description: "Hands-on robotics workshop with students in Kumasi",
     category: "Workshops",
@@ -28,6 +45,7 @@ const galleryItems = [
   {
     id: 3,
     type: "video",
+    src: video1,
     title: "Student Success Story",
     description: "Kofi shares how Edans Impact changed his life",
     category: "Stories",
@@ -35,6 +53,7 @@ const galleryItems = [
   {
     id: 4,
     type: "image",
+    src: image3,
     title: "Community Outreach",
     description: "Our team visiting partner schools in the Northern Region",
     category: "Community",
@@ -42,6 +61,7 @@ const galleryItems = [
   {
     id: 5,
     type: "image",
+    src: image4,
     title: "Leadership Training",
     description: "Students participating in leadership development activities",
     category: "Programs",
@@ -49,13 +69,15 @@ const galleryItems = [
   {
     id: 6,
     type: "image",
+    src: image5,
     title: "Award Ceremony",
     description: "Recognizing outstanding student innovators",
     category: "Events",
   },
   {
     id: 7,
-    type: "video",
+    type: "image",
+    src: image6,
     title: "Program Highlights 2023",
     description: "A recap of our programs throughout the year",
     category: "Programs",
@@ -63,6 +85,7 @@ const galleryItems = [
   {
     id: 8,
     type: "image",
+    src: image7,
     title: "Volunteer Team",
     description: "Our amazing volunteers at a community event",
     category: "Community",
@@ -70,6 +93,7 @@ const galleryItems = [
   {
     id: 9,
     type: "image",
+    src: image8,
     title: "Creative Arts Session",
     description: "Students exploring creativity through art",
     category: "Workshops",
@@ -77,6 +101,7 @@ const galleryItems = [
   {
     id: 10,
     type: "image",
+    src: image9,
     title: "Environmental Project",
     description: "Students working on their recycling initiative",
     category: "Programs",
@@ -84,13 +109,15 @@ const galleryItems = [
   {
     id: 11,
     type: "image",
+    src: image10,
     title: "Career Fair",
     description: "Students meeting industry professionals",
     category: "Events",
   },
   {
     id: 12,
-    type: "video",
+    type: "image",
+    src: image11,
     title: "Mentor Interview",
     description: "A mentor shares their experience with the program",
     category: "Stories",
@@ -123,6 +150,13 @@ export default function Gallery() {
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev === filteredItems.length - 1 ? 0 : prev + 1));
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') goToPrevious();
+    if (e.key === 'ArrowRight') goToNext();
+    if (e.key === 'Escape') closeLightbox();
   };
 
   return (
@@ -185,24 +219,36 @@ export default function Gallery() {
               <button
                 key={item.id}
                 onClick={() => openLightbox(index)}
-                className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20 to-secondary/20"
+                className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20 to-secondary/20 transition-transform hover:scale-105"
               >
-                <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                  {item.type === "video" ? (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
-                      <Play className="h-8 w-8 text-primary" />
+                {/* Image/Video Preview */}
+                {item.type === "video" ? (
+                  <div className="relative h-full w-full">
+                    <video
+                      src={item.src}
+                      className="h-full w-full object-cover"
+                      muted
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/80 backdrop-blur-sm">
+                        <Play className="h-8 w-8 text-primary-foreground fill-current" />
+                      </div>
                     </div>
-                  ) : (
-                    <ImageIcon className="h-12 w-12 text-primary/50" />
-                  )}
-                  <p className="mt-4 text-sm font-medium text-foreground">{item.title}</p>
-                </div>
+                  </div>
+                ) : (
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                  />
+                )}
                 
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/80 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/90 via-foreground/50 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                   <h3 className="font-heading text-lg font-bold text-primary-foreground">
                     {item.title}
                   </h3>
-                  <p className="mt-1 text-sm text-primary-foreground/80">
+                  <p className="mt-1 text-sm text-primary-foreground/80 line-clamp-2">
                     {item.description}
                   </p>
                   {item.type === "video" && (
@@ -212,54 +258,114 @@ export default function Gallery() {
                     </div>
                   )}
                 </div>
+
+                {/* Category Badge */}
+                <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur-sm">
+                  {item.category}
+                </div>
               </button>
             ))}
           </div>
+
+          {filteredItems.length === 0 && (
+            <div className="py-16 text-center">
+              <p className="text-lg text-muted-foreground">
+                No items found in this category.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Lightbox */}
       {lightboxOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/90 p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/95 p-4 backdrop-blur-sm"
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+        >
+          {/* Close Button */}
           <button
             onClick={closeLightbox}
-            className="absolute right-4 top-4 rounded-full bg-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:bg-primary-foreground/30"
+            className="absolute right-4 top-4 z-10 rounded-full bg-primary-foreground/20 p-2 text-primary-foreground transition-all hover:bg-primary-foreground/30 hover:scale-110"
+            aria-label="Close lightbox"
           >
             <X className="h-6 w-6" />
           </button>
           
+          {/* Previous Button */}
           <button
             onClick={goToPrevious}
-            className="absolute left-4 rounded-full bg-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:bg-primary-foreground/30"
+            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-primary-foreground/20 p-3 text-primary-foreground transition-all hover:bg-primary-foreground/30 hover:scale-110"
+            aria-label="Previous image"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           
+          {/* Next Button */}
           <button
             onClick={goToNext}
-            className="absolute right-4 rounded-full bg-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:bg-primary-foreground/30 lg:right-auto lg:left-auto"
-            style={{ right: '4rem' }}
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-primary-foreground/20 p-3 text-primary-foreground transition-all hover:bg-primary-foreground/30 hover:scale-110"
+            aria-label="Next image"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
           
-          <div className="max-h-[80vh] max-w-4xl overflow-hidden rounded-2xl bg-card">
-            <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+          {/* Content */}
+          <div className="max-h-[90vh] max-w-6xl w-full overflow-hidden rounded-2xl bg-card shadow-2xl">
+            <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20">
               {filteredItems[currentIndex]?.type === "video" ? (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/30">
-                  <Play className="h-10 w-10 text-primary" />
-                </div>
+                <video
+                  src={filteredItems[currentIndex]?.src}
+                  controls
+                  autoPlay
+                  className="h-full w-full object-contain"
+                />
               ) : (
-                <ImageIcon className="h-20 w-20 text-primary/50" />
+                <img
+                  src={filteredItems[currentIndex]?.src}
+                  alt={filteredItems[currentIndex]?.title}
+                  className="h-full w-full object-contain"
+                />
               )}
             </div>
-            <div className="p-6">
-              <h3 className="font-heading text-xl font-bold text-foreground">
-                {filteredItems[currentIndex]?.title}
-              </h3>
-              <p className="mt-2 text-muted-foreground">
-                {filteredItems[currentIndex]?.description}
-              </p>
+            
+            {/* Info Panel */}
+            <div className="p-6 border-t border-border">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-heading text-2xl font-bold text-foreground">
+                    {filteredItems[currentIndex]?.title}
+                  </h3>
+                  <p className="mt-2 text-muted-foreground">
+                    {filteredItems[currentIndex]?.description}
+                  </p>
+                </div>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                  {filteredItems[currentIndex]?.category}
+                </span>
+              </div>
+              
+              {/* Counter */}
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                <p className="text-sm text-muted-foreground">
+                  {currentIndex + 1} / {filteredItems.length}
+                </p>
+                <div className="flex gap-2">
+                  {filteredItems[currentIndex]?.type === "video" && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Video className="h-4 w-4" />
+                      Video
+                    </span>
+                  )}
+                  {filteredItems[currentIndex]?.type === "image" && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <ImageIcon className="h-4 w-4" />
+                      Image
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
