@@ -176,11 +176,7 @@ export default function MissionImpact() {
               Creating lasting change in the lives of Ghana's youth through 
               innovation, education, and empowerment.
             </p>
-            {usingFallback && (
-              <div className="mt-4 inline-block rounded-full bg-primary-foreground/20 px-4 py-1 text-sm text-primary-foreground">
-                Using fallback data
-              </div>
-            )}
+            
           </div>
         </div>
         
