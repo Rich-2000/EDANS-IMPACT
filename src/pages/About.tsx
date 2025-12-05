@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,8 @@ import {
   Sparkles
 } from "lucide-react";
 
-const teamMembers = [
+// Fallback data
+const fallbackTeamMembers = [
   {
     name: "Emmanuel Danso",
     role: "Founder & Executive Director",
@@ -36,7 +38,7 @@ const teamMembers = [
   },
 ];
 
-const values = [
+const fallbackValues = [
   {
     title: "Innovation",
     description: "We believe in the power of creative thinking and problem-solving.",
@@ -59,7 +61,88 @@ const values = [
   },
 ];
 
+const fallbackStory = `Edans Impact was founded with a simple yet powerful belief: every student, 
+regardless of their economic background, deserves the opportunity to develop 
+their creative potential and contribute meaningfully to society.
+
+Starting in Accra, we began organizing small workshops and mentorship sessions 
+for students in underserved communities. What started as a grassroots initiative 
+has grown into a movement that reaches thousands of students across Ghana.
+
+Today, we continue to expand our reach, partnering with schools, educators, 
+and community leaders to create lasting impact in the lives of young Ghanaians.`;
+
 export default function About() {
+  const [story, setStory] = useState(fallbackStory);
+  const [values, setValues] = useState(fallbackValues);
+  const [teamMembers, setTeamMembers] = useState(fallbackTeamMembers);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:5000/api/about");
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (!data.isFallback && data.data) {
+            // Update story
+            if (data.data.story) {
+              setStory(data.data.story);
+            }
+            
+            // Update values
+            if (data.data.values && data.data.values.length > 0) {
+              setValues(data.data.values.map((value: any) => ({
+                title: value.title,
+                description: value.description,
+                icon: value.title.includes("Innovation") ? Lightbulb :
+                      value.title.includes("Empowerment") ? Award :
+                      value.title.includes("Inclusivity") ? Users :
+                      value.title.includes("Excellence") ? Target : Lightbulb
+              })));
+            }
+            
+            // Update team members
+            if (data.data.team && data.data.team.length > 0) {
+              setTeamMembers(data.data.team.map((member: any) => ({
+                name: member.name,
+                role: member.role,
+                image: member.image || member.name.split(' ').map((n: string) => n[0]).join('')
+              })));
+            }
+            
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
+          }
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (error) {
+        console.error("Error fetching about data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -104,20 +187,9 @@ export default function About() {
                 How It All Began
               </h2>
               <div className="mt-6 space-y-4 text-muted-foreground">
-                <p>
-                  Edans Impact was founded with a simple yet powerful belief: every student, 
-                  regardless of their economic background, deserves the opportunity to develop 
-                  their creative potential and contribute meaningfully to society.
-                </p>
-                <p>
-                  Starting in Accra, we began organizing small workshops and mentorship sessions 
-                  for students in underserved communities. What started as a grassroots initiative 
-                  has grown into a movement that reaches thousands of students across Ghana.
-                </p>
-                <p>
-                  Today, we continue to expand our reach, partnering with schools, educators, 
-                  and community leaders to create lasting impact in the lives of young Ghanaians.
-                </p>
+                {story.split('\n\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
               </div>
             </div>
             

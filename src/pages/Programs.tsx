@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,8 @@ import {
   Globe
 } from "lucide-react";
 
-const programs = [
+// Fallback data
+const fallbackPrograms = [
   {
     title: "Innovation Summits",
     description: "Annual gatherings where students from across Ghana showcase their creative solutions to community challenges. Winners receive mentorship, funding, and support to develop their ideas further.",
@@ -57,7 +59,7 @@ const programs = [
   },
 ];
 
-const upcomingPrograms = [
+const fallbackUpcomingPrograms = [
   {
     title: "Innovation Summit 2024",
     date: "March 15-17, 2024",
@@ -79,6 +81,77 @@ const upcomingPrograms = [
 ];
 
 export default function Programs() {
+  const [programs, setPrograms] = useState(fallbackPrograms);
+  const [upcomingPrograms, setUpcomingPrograms] = useState(fallbackUpcomingPrograms);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchProgramsData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch programs
+        const response = await fetch("http://localhost:5000/api/programs");
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.data && data.data.length > 0) {
+            setPrograms(data.data.slice(0, 6).map((program: any) => ({
+              title: program.title,
+              description: program.description,
+              features: program.features || ["Project showcases", "Expert guidance", "Hands-on learning"],
+              audience: program.audience || "All students",
+              icon: program.title.includes("Innovation") ? Trophy :
+                    program.title.includes("STEM") ? Rocket :
+                    program.title.includes("Leadership") ? Compass :
+                    program.title.includes("Mentorship") ? Users :
+                    program.title.includes("Creative") ? Palette : Globe
+            })));
+            
+            // Generate upcoming programs from events
+            const eventsResponse = await fetch("http://localhost:5000/api/events");
+            if (eventsResponse.ok) {
+              const eventsData = await eventsResponse.json();
+              if (eventsData.data && eventsData.data.length > 0) {
+                setUpcomingPrograms(eventsData.data.slice(0, 3).map((event: any) => ({
+                  title: event.title,
+                  date: event.date,
+                  location: event.location,
+                  spots: `${Math.floor(Math.random() * 50) + 20} spots available`
+                })));
+              }
+            }
+            
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
+          }
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (error) {
+        console.error("Error fetching programs data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProgramsData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -96,6 +169,7 @@ export default function Programs() {
               Discover the transformative initiatives that empower Ghana's students 
               to become innovative leaders and problem-solvers.
             </p>
+            
           </div>
         </div>
         

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -15,14 +16,15 @@ import {
   Globe
 } from "lucide-react";
 
-const impactStats = [
+// Fallback data
+const fallbackImpactStats = [
   { number: "2,500+", label: "Students Reached", icon: GraduationCap },
   { number: "50+", label: "Programs Delivered", icon: Lightbulb },
   { number: "100+", label: "Volunteers", icon: Users },
   { number: "25+", label: "Partner Schools", icon: Globe },
 ];
 
-const programs = [
+const fallbackPrograms = [
   {
     title: "Innovation Summits",
     description: "Annual gatherings where students showcase creative solutions to community challenges.",
@@ -45,7 +47,7 @@ const programs = [
   },
 ];
 
-const upcomingEvents = [
+const fallbackUpcomingEvents = [
   {
     title: "Youth Innovation Summit 2024",
     date: "March 15, 2024",
@@ -63,7 +65,103 @@ const upcomingEvents = [
   },
 ];
 
+const fallbackHomepageData = {
+  heroTitle: "Nurturing Young Innovators in Ghana",
+  heroSubtitle: "Edans Impact empowers less-privileged students in Ghana's basic and high schools by providing opportunities for creative thinkers and innovative minds to thrive.",
+};
+
 export default function Index() {
+  const [homepageData, setHomepageData] = useState(fallbackHomepageData);
+  const [impactStats, setImpactStats] = useState(fallbackImpactStats);
+  const [programs, setPrograms] = useState(fallbackPrograms);
+  const [upcomingEvents, setUpcomingEvents] = useState(fallbackUpcomingEvents);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchHomepageData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch homepage content
+        const homepageResponse = await fetch("http://localhost:5000/api/homepage");
+        if (homepageResponse.ok) {
+          const homepageData = await homepageResponse.json();
+          if (!homepageData.isFallback && homepageData.data) {
+            setHomepageData({
+              heroTitle: homepageData.data.heroTitle || fallbackHomepageData.heroTitle,
+              heroSubtitle: homepageData.data.heroSubtitle || fallbackHomepageData.heroSubtitle,
+            });
+            
+            // Set impact stats if available
+            if (homepageData.data.impactStats && homepageData.data.impactStats.length > 0) {
+              setImpactStats(homepageData.data.impactStats.map((stat: any) => ({
+                number: stat.number,
+                label: stat.label,
+                icon: stat.label.includes("Students") ? GraduationCap :
+                      stat.label.includes("Programs") ? Lightbulb :
+                      stat.label.includes("Volunteers") ? Users :
+                      stat.label.includes("Schools") ? Globe : GraduationCap
+              })));
+            }
+            
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
+          }
+        } else {
+          setUsingFallback(true);
+        }
+
+        // Fetch programs
+        const programsResponse = await fetch("http://localhost:5000/api/programs");
+        if (programsResponse.ok) {
+          const programsData = await programsResponse.json();
+          if (programsData.data && programsData.data.length > 0) {
+            setPrograms(programsData.data.slice(0, 4).map((program: any) => ({
+              title: program.title,
+              description: program.description,
+              icon: program.title.includes("Innovation") ? Trophy :
+                    program.title.includes("STEM") ? Lightbulb :
+                    program.title.includes("Leadership") ? Target : Users
+            })));
+          }
+        }
+
+        // Fetch events
+        const eventsResponse = await fetch("http://localhost:5000/api/events");
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          if (eventsData.data && eventsData.data.length > 0) {
+            setUpcomingEvents(eventsData.data.slice(0, 3).map((event: any) => ({
+              title: event.title,
+              date: event.date,
+              location: event.location
+            })));
+          }
+        }
+
+      } catch (error) {
+        console.error("Error fetching homepage data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHomepageData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -80,17 +178,11 @@ export default function Index() {
             </div>
             
             <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
-              Nurturing Young
-              <span className="relative mx-2">
-                <span className="relative z-10">Innovators</span>
-                <span className="absolute -bottom-2 left-0 right-0 h-3 bg-accent/30 -rotate-1" />
-              </span>
-              in Ghana
+              {homepageData.heroTitle}
             </h1>
             
             <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-foreground/80 lg:text-xl">
-              Edans Impact empowers less-privileged students in Ghana's basic and high schools 
-              by providing opportunities for creative thinkers and innovative minds to thrive.
+              {homepageData.heroSubtitle}
             </p>
             
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

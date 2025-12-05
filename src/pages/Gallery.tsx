@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { 
@@ -25,7 +25,8 @@ import image11 from '../assets/images/student-success.jpg';
 // Import your video
 import video1 from '../assets/videos/student-success.mp4';
 
-const galleryItems = [
+// Fallback data
+const fallbackGalleryItems = [
   {
     id: 1,
     type: "image",
@@ -127,9 +128,51 @@ const galleryItems = [
 const categories = ["All", "Events", "Workshops", "Programs", "Community", "Stories"];
 
 export default function Gallery() {
+  const [galleryItems, setGalleryItems] = useState(fallbackGalleryItems);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchGalleryData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:5000/api/gallery");
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.data && data.data.length > 0) {
+            // Transform API data to match our structure
+            const transformedItems = data.data.map((item: any, index: number) => ({
+              id: item._id || index + 1,
+              type: item.type || "image",
+              src: item.url || item.src || fallbackGalleryItems[index]?.src || image1,
+              title: item.title || `Gallery Item ${index + 1}`,
+              description: item.description || "Gallery item description",
+              category: item.category || ["Events", "Workshops", "Programs", "Community", "Stories"][index % 5]
+            }));
+            
+            setGalleryItems(transformedItems);
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
+          }
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (error) {
+        console.error("Error fetching gallery data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGalleryData();
+  }, []);
 
   const filteredItems = selectedCategory === "All" 
     ? galleryItems 
@@ -159,6 +202,16 @@ export default function Gallery() {
     if (e.key === 'Escape') closeLightbox();
   };
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -176,6 +229,7 @@ export default function Gallery() {
               Explore photos and videos from our programs, events, and the 
               incredible students we work with.
             </p>
+            
           </div>
         </div>
         

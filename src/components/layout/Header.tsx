@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/images/logo.png";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -24,12 +25,16 @@ export function Header() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
         {/* Logo - Always shows logo and name */}
         <Link to="/" className="flex items-center gap-2 font-heading text-xl font-bold">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-hero shrink-0">
-            <span className="text-lg font-bold text-primary-foreground">E</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0">
+            <img 
+              src={logo} 
+              alt="Edans Impact Logo" 
+              className="h-10 w-10 object-contain"
+            />
           </div>
           <span className="flex items-center">
             <span className="text-primary">EDANS</span>
-            <span className="text-secondary ml-1">IMPACT</span>
+            <span className="text-secondary ml-1">Impact</span>
           </span>
         </Link>
 

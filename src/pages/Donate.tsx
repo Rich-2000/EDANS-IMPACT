@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,14 +6,15 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Gift, Users, GraduationCap, CheckCircle, Sparkles, BookOpen, Lightbulb } from "lucide-react";
 
-const impactLevels = [
-  { amount: 50, label: "Supporter", impact: "Provides school supplies for 5 students", icon: BookOpen },
-  { amount: 100, label: "Champion", impact: "Sponsors a student to attend a workshop", icon: Users },
-  { amount: 250, label: "Advocate", impact: "Funds a full innovation project for a student", icon: Lightbulb },
-  { amount: 500, label: "Partner", impact: "Sponsors a mentorship program for 10 students", icon: GraduationCap },
+// Fallback data - updated to Ghanaian cedis
+const fallbackImpactLevels = [
+  { amount: 500, label: "Supporter", impact: "Provides school supplies for 5 students", icon: BookOpen },
+  { amount: 1000, label: "Champion", impact: "Sponsors a student to attend a workshop", icon: Users },
+  { amount: 2500, label: "Advocate", impact: "Funds a full innovation project for a student", icon: Lightbulb },
+  { amount: 5000, label: "Partner", impact: "Sponsors a mentorship program for 10 students", icon: GraduationCap },
 ];
 
-const donationUses = [
+const fallbackDonationUses = [
   "Workshop materials and equipment",
   "Student transportation to events",
   "Mentorship program coordination",
@@ -24,11 +25,20 @@ const donationUses = [
 
 export default function Donate() {
   const { toast } = useToast();
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(100);
+  const [impactLevels, setImpactLevels] = useState(fallbackImpactLevels);
+  const [donationUses, setDonationUses] = useState(fallbackDonationUses);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(1000);
   const [customAmount, setCustomAmount] = useState("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">("one-time");
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    // In a real app, you might fetch donation info from API
+    // For now, we'll use fallback data
+    setUsingFallback(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,18 +58,76 @@ export default function Donate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (getFinalAmount() <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please select or enter a valid donation amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast({
-      title: "Thank You!",
-      description: `Your ${donationType} donation of $${getFinalAmount()} will help empower Ghana's youth.`,
-    });
-    setIsSubmitting(false);
+
+    try {
+      // Submit donation to API
+      const response = await fetch("http://localhost:5000/api/donations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          amount: getFinalAmount(),
+          type: donationType,
+          status: "completed",
+          currency: "GHS"
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Thank You!",
+          description: `Your ${donationType} donation of GH₵${getFinalAmount()} will help empower Ghana's youth.`,
+          variant: "default",
+        });
+
+        // Reset form
+        setSelectedAmount(1000);
+        setCustomAmount("");
+        setDonationType("one-time");
+        setFormData({ firstName: "", lastName: "", email: "" });
+      } else {
+        throw new Error("Failed to submit donation");
+      }
+    } catch (error) {
+      console.error("Error submitting donation:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Layout>
-      {/* Hero Section - Exact same design as about.tsx */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-hero pb-24 pt-20 lg:pb-28 lg:pt-28">
         <div className="absolute inset-0 bg-hero-pattern opacity-50" />
         <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" />
@@ -73,10 +141,11 @@ export default function Donate() {
             </div>
             <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl">Make a Donation</h1>
             <p className="mt-6 text-lg text-primary-foreground/80">Your generosity empowers Ghana's next generation of innovators.</p>
+            
           </div>
         </div>
         
-        {/* Decorative wave - Exact same as about.tsx */}
+        {/* Decorative wave */}
         <div className="absolute bottom-0 left-0 right-0 -mb-px">
           <svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="block h-[100px] w-full">
             <path
@@ -104,7 +173,7 @@ export default function Donate() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-heading text-xl font-bold text-foreground">${level.amount}</span>
+                            <span className="font-heading text-xl font-bold text-foreground">GH₵{level.amount}</span>
                             <span className="text-sm text-muted-foreground">{level.label}</span>
                           </div>
                           <p className="mt-1 text-sm text-muted-foreground">{level.impact}</p>
@@ -146,18 +215,18 @@ export default function Donate() {
                   <div className="mb-8">
                     <Label>Select Amount</Label>
                     <div className="mt-3 grid grid-cols-4 gap-3">
-                      {[25, 50, 100, 250].map((amount) => (
+                      {[250, 500, 1000, 2500].map((amount) => (
                         <button key={amount} type="button" onClick={() => handleAmountSelect(amount)}
                           className={`rounded-xl border py-3 font-semibold transition-all ${selectedAmount === amount ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted hover:border-primary"}`}>
-                          ${amount}
+                          GH₵{amount}
                         </button>
                       ))}
                     </div>
                     <div className="mt-3">
                       <Label htmlFor="customAmount">Or enter custom amount</Label>
                       <div className="relative mt-2">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input id="customAmount" type="number" value={customAmount} onChange={handleCustomAmountChange} className="pl-8" placeholder="Enter amount" min="1" />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">GH₵</span>
+                        <Input id="customAmount" type="number" value={customAmount} onChange={handleCustomAmountChange} className="pl-12" placeholder="Enter amount" min="1" />
                       </div>
                     </div>
                   </div>
@@ -176,12 +245,12 @@ export default function Donate() {
                   <div className="mb-8 rounded-xl bg-gradient-subtle p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{donationType === "monthly" ? "Monthly donation" : "One-time donation"}</span>
-                      <span className="font-heading text-2xl font-bold text-foreground">${getFinalAmount()}</span>
+                      <span className="font-heading text-2xl font-bold text-foreground">GH₵{getFinalAmount()}</span>
                     </div>
                   </div>
                   
                   <Button type="submit" variant="hero" size="xl" className="w-full" disabled={isSubmitting || getFinalAmount() === 0}>
-                    {isSubmitting ? "Processing..." : (<><Heart className="mr-2 h-5 w-5" />Donate ${getFinalAmount()} {donationType === "monthly" ? "/month" : ""}</>)}
+                    {isSubmitting ? "Processing..." : (<><Heart className="mr-2 h-5 w-5" />Donate GH₵{getFinalAmount()} {donationType === "monthly" ? "/month" : ""}</>)}
                   </Button>
                   <p className="mt-4 text-center text-xs text-muted-foreground">Your donation is secure. You will receive a receipt via email.</p>
                 </form>

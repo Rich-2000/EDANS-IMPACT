@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,8 @@ import {
   Search
 } from "lucide-react";
 
-const featuredPost = {
+// Fallback data
+const fallbackFeaturedPost = {
   id: 1,
   title: "How Innovation Summits Are Shaping Ghana's Future Leaders",
   excerpt: "Discover how our annual Innovation Summits have become a launching pad for young Ghanaian innovators, creating opportunities and inspiring the next generation of problem-solvers.",
@@ -19,7 +21,7 @@ const featuredPost = {
   readTime: "8 min read",
 };
 
-const blogPosts = [
+const fallbackBlogPosts = [
   {
     id: 2,
     title: "5 Students Who Turned Their Ideas Into Community Solutions",
@@ -88,6 +90,87 @@ const categories = [
 ];
 
 export default function Blog() {
+  const [featuredPost, setFeaturedPost] = useState(fallbackFeaturedPost);
+  const [blogPosts, setBlogPosts] = useState(fallbackBlogPosts);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Posts");
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:5000/api/blog");
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.data && data.data.length > 0) {
+            // Set featured post (first post)
+            const firstPost = data.data[0];
+            setFeaturedPost({
+              id: firstPost._id || 1,
+              title: firstPost.title,
+              excerpt: firstPost.excerpt,
+              author: firstPost.author,
+              date: firstPost.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+              category: firstPost.category || "Updates",
+              readTime: `${Math.ceil(firstPost.content?.length / 1000) || 5} min read`
+            });
+            
+            // Set other blog posts
+            const otherPosts = data.data.slice(1, 7).map((post: any, index: number) => ({
+              id: post._id || index + 2,
+              title: post.title,
+              excerpt: post.excerpt,
+              author: post.author,
+              date: post.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+              category: post.category || ["Success Stories", "Education", "Volunteer Stories", "Announcements", "Tips & Guides", "Updates"][index],
+              readTime: `${Math.ceil(post.content?.length / 1000) || 5} min read`
+            }));
+            
+            setBlogPosts(otherPosts);
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
+          }
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (error) {
+        console.error("Error fetching blog data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlogData();
+  }, []);
+
+  // Filter posts based on search and category
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesSearch = searchQuery === "" || 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === "All Posts" || 
+      post.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -105,6 +188,7 @@ export default function Blog() {
               Stories of impact, educational insights, and updates from our programs 
               across Ghana.
             </p>
+            
           </div>
         </div>
         
@@ -129,13 +213,20 @@ export default function Blog() {
                 type="search"
                 placeholder="Search articles..."
                 className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex flex-wrap gap-2">
               {categories.slice(0, 5).map((category) => (
                 <button
                   key={category}
-                  className="rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors hover:border-primary hover:text-primary ${
+                    selectedCategory === category
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground"
+                  }`}
+                  onClick={() => setSelectedCategory(category)}
                 >
                   {category}
                 </button>
@@ -195,7 +286,7 @@ export default function Blog() {
           </h2>
           
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {blogPosts.map((post) => (
+            {filteredPosts.map((post) => (
               <article
                 key={post.id}
                 className="group rounded-2xl border border-border bg-card p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -221,6 +312,12 @@ export default function Blog() {
               </article>
             ))}
           </div>
+          
+          {filteredPosts.length === 0 && (
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground">No articles found matching your criteria.</p>
+            </div>
+          )}
           
           <div className="mt-12 text-center">
             <Button variant="outline" size="lg">

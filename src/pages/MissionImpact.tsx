@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,8 @@ import {
   Quote
 } from "lucide-react";
 
-const impactMetrics = [
+// Fallback data
+const fallbackImpactMetrics = [
   {
     number: "2,500+",
     label: "Students Reached",
@@ -58,7 +60,7 @@ const impactMetrics = [
   },
 ];
 
-const successStories = [
+const fallbackSuccessStories = [
   {
     name: "Kofi Mensah",
     school: "Achimota School",
@@ -87,6 +89,76 @@ const sdgAlignments = [
 ];
 
 export default function MissionImpact() {
+  const [impactMetrics, setImpactMetrics] = useState(fallbackImpactMetrics);
+  const [successStories, setSuccessStories] = useState(fallbackSuccessStories);
+  const [isLoading, setIsLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    const fetchMissionImpactData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch impact data from multiple sources
+        const [programsResponse, eventsResponse, aboutResponse] = await Promise.all([
+          fetch("http://localhost:5000/api/programs"),
+          fetch("http://localhost:5000/api/events"),
+          fetch("http://localhost:5000/api/about")
+        ]);
+        
+        if (programsResponse.ok && eventsResponse.ok) {
+          const programsData = await programsResponse.json();
+          const eventsData = await eventsResponse.json();
+          const aboutData = aboutResponse.ok ? await aboutResponse.json() : null;
+          
+          // Update impact metrics based on real data
+          const updatedMetrics = [...fallbackImpactMetrics];
+          updatedMetrics[0].number = `${Math.floor(programsData.count * 50)}+`; // Estimate students
+          updatedMetrics[1].number = `${programsData.count}+`; // Programs count
+          updatedMetrics[2].number = "100+"; // Fixed for now
+          updatedMetrics[3].number = `${Math.floor(programsData.count / 2)}+`; // Estimate schools
+          
+          setImpactMetrics(updatedMetrics);
+          
+          // Update success stories if available from about data
+          if (aboutData?.data?.team) {
+            const teamStories = aboutData.data.team.slice(0, 3).map((member: any, index: number) => ({
+              name: member.name,
+              school: ["Achimota School", "Wesley Girls' High School", "Prempeh College"][index],
+              story: `${member.name} joined our team as ${member.role} and has been instrumental in our mission.`,
+              quote: fallbackSuccessStories[index].quote
+            }));
+            
+            if (teamStories.length > 0) {
+              setSuccessStories(teamStories);
+            }
+          }
+          
+          setUsingFallback(false);
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (error) {
+        console.error("Error fetching mission impact data:", error);
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMissionImpactData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -104,6 +176,11 @@ export default function MissionImpact() {
               Creating lasting change in the lives of Ghana's youth through 
               innovation, education, and empowerment.
             </p>
+            {usingFallback && (
+              <div className="mt-4 inline-block rounded-full bg-primary-foreground/20 px-4 py-1 text-sm text-primary-foreground">
+                Using fallback data
+              </div>
+            )}
           </div>
         </div>
         

@@ -15,6 +15,7 @@ import { TiktokIcon } from "@/components/icons/TiktokIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/images/logo.png";
 
 const quickLinks = [
   { label: "About Us", href: "/about" },
@@ -118,12 +119,14 @@ export function Footer() {
           {/* About */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 font-heading text-xl font-bold">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-hero">
-                <span className="text-lg font-bold text-primary-foreground">E</span>
-              </div>
+              <img 
+                src={logo} 
+                alt="Edans Impact Logo" 
+                className="h-10 w-10 object-contain"
+              />
               <span>
                 <span className="text-primary">EDANS</span>
-                <span className="text-secondary"> IMPACT</span>
+                <span className="text-secondary"> Impact</span>
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">

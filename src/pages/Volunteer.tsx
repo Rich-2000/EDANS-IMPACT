@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import emailjs from "@emailjs/browser";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
   Clock,
   Award,
   BookOpen,
-  Globe,
   CheckCircle,
   ArrowRight
 } from "lucide-react";
@@ -23,7 +22,8 @@ const EMAILJS_SERVICE_ID = "service_7jp0flp";
 const EMAILJS_VOLUNTEER_TEMPLATE_ID = "template_46pssq6";
 const EMAILJS_PUBLIC_KEY = "eU3ZuZL7r67CTtTF3";
 
-const benefits = [
+// Fallback data
+const fallbackBenefits = [
   {
     icon: Heart,
     title: "Make a Real Impact",
@@ -46,7 +46,7 @@ const benefits = [
   },
 ];
 
-const volunteerRoles = [
+const fallbackVolunteerRoles = [
   {
     title: "Workshop Facilitator",
     commitment: "4-8 hours/month",
@@ -94,6 +94,8 @@ const skills = [
 
 export default function Volunteer() {
   const { toast } = useToast();
+  const [benefits, setBenefits] = useState(fallbackBenefits);
+  const [volunteerRoles, setVolunteerRoles] = useState(fallbackVolunteerRoles);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -108,6 +110,13 @@ export default function Volunteer() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    // In a real app, you might fetch volunteer roles from API
+    // For now, we'll use fallback data
+    setUsingFallback(true);
+  }, []);
 
   // Validate if form is complete and valid
   const isFormValid = useMemo(() => {
@@ -232,7 +241,7 @@ export default function Volunteer() {
         title: "Validation Error",
         description: "Please fill in all required fields correctly.",
         variant: "destructive",
-        duration: 4000, // Auto-dismiss after 4 seconds
+        duration: 4000,
       });
       return;
     }
@@ -240,10 +249,30 @@ export default function Volunteer() {
     setIsSubmitting(true);
     
     try {
-      // Initialize EmailJS with your public key
+      // First, send to your API for storage
+      const apiResponse = await fetch("http://localhost:5000/api/volunteer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          location: formData.location,
+          occupation: formData.occupation || "",
+          availability: formData.availability,
+          motivation: formData.motivation,
+          skills: formData.selectedSkills,
+          roles: formData.selectedRoles,
+          status: "pending"
+        }),
+      });
+
+      // Then, send email notification via EmailJS
       emailjs.init(EMAILJS_PUBLIC_KEY);
 
-      // Prepare template parameters
       const templateParams = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -258,19 +287,18 @@ export default function Volunteer() {
         roles: formData.selectedRoles.join(", "),
       };
 
-      // Send email using EmailJS
-      const response = await emailjs.send(
+      const emailResponse = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_VOLUNTEER_TEMPLATE_ID,
         templateParams
       );
 
-      if (response.status === 200) {
+      if (apiResponse.ok && emailResponse.status === 200) {
         toast({
           title: "Application Submitted Successfully! ✓",
           description: "Thank you for your interest in volunteering. We'll review your application and contact you within 48 hours.",
           variant: "default",
-          duration: 5000, // Auto-dismiss after 5 seconds
+          duration: 5000,
         });
         
         // Reset form
@@ -289,12 +317,12 @@ export default function Volunteer() {
         setFormErrors({});
       }
     } catch (error) {
-      console.error("EmailJS Error:", error);
+      console.error("Error:", error);
       toast({
         title: "Error Submitting Application",
-        description: "Something went wrong. Please try again or contact us directly at edansimpact@gmail.com",
+        description: "Something went wrong. Please try again or contact us directly.",
         variant: "destructive",
-        duration: 6000, // Auto-dismiss after 6 seconds (longer for error messages)
+        duration: 6000,
       });
     } finally {
       setIsSubmitting(false);
@@ -318,6 +346,7 @@ export default function Volunteer() {
               Join our community of dedicated volunteers and help shape the future 
               of Ghana's youth through education and empowerment.
             </p>
+            
           </div>
         </div>
         

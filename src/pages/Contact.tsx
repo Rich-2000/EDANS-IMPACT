@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import emailjs from "@emailjs/browser";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,8 @@ const EMAILJS_SERVICE_ID = "service_7jp0flp";
 const EMAILJS_TEMPLATE_ID = "template_6tsca06";
 const EMAILJS_PUBLIC_KEY = "eU3ZuZL7r67CTtTF3"; 
 
-const contactInfo = [
+// Fallback contact info
+const fallbackContactInfo = [
   {
     icon: Mail,
     title: "Email",
@@ -58,6 +59,7 @@ const inquiryTypes = [
 
 export default function Contact() {
   const { toast } = useToast();
+  const [contactInfo, setContactInfo] = useState(fallbackContactInfo);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -67,8 +69,14 @@ export default function Contact() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [subscribeEmail, setSubscribeEmail] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    // In a real app, you might fetch contact info from API
+    // For now, we'll use fallback data
+    setUsingFallback(true);
+  }, []);
 
   // Validate if form is complete and valid
   const isFormValid = useMemo(() => {
@@ -86,12 +94,6 @@ export default function Contact() {
     
     return hasRequiredFields && isEmailValid;
   }, [formData]);
-
-  // Validate if subscribe email is valid
-  const isSubscribeValid = useMemo(() => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return subscribeEmail.trim() !== "" && emailRegex.test(subscribeEmail);
-  }, [subscribeEmail]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -149,10 +151,26 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // Initialize EmailJS with your public key
+      // First, send to your API for storage
+      const apiResponse = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || "",
+          organization: formData.organization || "",
+          inquiryType: formData.inquiryType,
+          message: formData.message,
+          status: "new"
+        }),
+      });
+
+      // Then, send email notification via EmailJS
       emailjs.init(EMAILJS_PUBLIC_KEY);
 
-      // Prepare template parameters
       const templateParams = {
         name: formData.name,
         email: formData.email,
@@ -162,14 +180,13 @@ export default function Contact() {
         message: formData.message,
       };
 
-      // Send email using EmailJS
-      const response = await emailjs.send(
+      const emailResponse = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         templateParams
       );
 
-      if (response.status === 200) {
+      if (apiResponse.ok && emailResponse.status === 200) {
         toast({
           title: "Message Sent Successfully! ✓",
           description: "Thank you for contacting us. We'll get back to you within 24 hours.",
@@ -188,35 +205,14 @@ export default function Contact() {
         setFormErrors({});
       }
     } catch (error) {
-      console.error("EmailJS Error:", error);
+      console.error("Error:", error);
       toast({
         title: "Error Sending Message",
-        description: "Something went wrong. Please try again or contact us directly at edansimpact@gmail.com",
+        description: "Something went wrong. Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (isSubscribeValid) {
-      toast({
-        title: "Thank You for Subscribing! 🎉",
-        description: `You'll receive our latest updates and news at ${subscribeEmail}`,
-        variant: "default",
-      });
-      
-      // Reset subscribe email
-      setSubscribeEmail("");
-    } else {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -236,6 +232,7 @@ export default function Contact() {
             <p className="mt-6 text-lg text-primary-foreground/80">
               Have questions? Want to partner with us? We'd love to hear from you.
             </p>
+            
           </div>
         </div>
         
