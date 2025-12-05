@@ -4,7 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Gift, Users, GraduationCap, CheckCircle, Sparkles, BookOpen, Lightbulb } from "lucide-react";
+import { Heart, Gift, Users, GraduationCap, CheckCircle, Sparkles, BookOpen, Lightbulb, Loader2 } from "lucide-react";
+
+// Import Paystack
+declare global {
+  interface Window {
+    PaystackPop: any;
+  }
+}
+
+const PAYSTACK_PUBLIC_KEY = "pk_test_cea39a1d794c2ea550a5fb50a6e45b1a9d36f788";
 
 // Fallback data - updated to Ghanaian cedis
 const fallbackImpactLevels = [
@@ -25,20 +34,35 @@ const fallbackDonationUses = [
 
 export default function Donate() {
   const { toast } = useToast();
-  const [impactLevels, setImpactLevels] = useState(fallbackImpactLevels);
-  const [donationUses, setDonationUses] = useState(fallbackDonationUses);
+  const [impactLevels] = useState(fallbackImpactLevels);
+  const [donationUses] = useState(fallbackDonationUses);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(1000);
   const [customAmount, setCustomAmount] = useState("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">("one-time");
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
 
+  // Load Paystack script
   useEffect(() => {
-    // In a real app, you might fetch donation info from API
-    // For now, we'll use fallback data
-    setUsingFallback(true);
-  }, []);
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    script.onload = () => setPaystackLoaded(true);
+    script.onerror = () => {
+      console.error("Failed to load Paystack script");
+      toast({
+        title: "Error",
+        description: "Failed to load payment gateway. Please refresh the page.",
+        variant: "destructive",
+      });
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,14 +80,112 @@ export default function Donate() {
 
   const getFinalAmount = () => (customAmount ? parseFloat(customAmount) || 0 : selectedAmount || 0);
 
+  const verifyPayment = async (reference: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/donations/verify/${reference}`);
+      const data = await response.json();
+
+      if (data.success && data.data.donation.status === "completed") {
+        toast({
+          title: "Payment Successful! 🎉",
+          description: `Thank you for your ${donationType} donation of GH₵${getFinalAmount()}. Your generosity will help empower Ghana's youth!`,
+          variant: "default",
+        });
+
+        // Reset form
+        setSelectedAmount(1000);
+        setCustomAmount("");
+        setDonationType("one-time");
+        setFormData({ firstName: "", lastName: "", email: "" });
+      } else {
+        throw new Error("Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      toast({
+        title: "Verification Error",
+        description: "We couldn't verify your payment. Please contact us if you were charged.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePaystackPayment = async (authorizationUrl: string, reference: string) => {
+    if (!window.PaystackPop) {
+      toast({
+        title: "Error",
+        description: "Payment gateway not loaded. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: formData.email,
+      amount: getFinalAmount() * 100, // Convert to pesewas
+      currency: "GHS",
+      ref: reference,
+      channels: ["card", "mobile_money"],
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Donor Name",
+            variable_name: "donor_name",
+            value: `${formData.firstName} ${formData.lastName}`,
+          },
+          {
+            display_name: "Donation Type",
+            variable_name: "donation_type",
+            value: donationType,
+          },
+        ],
+      },
+      onClose: function () {
+        toast({
+          title: "Payment Cancelled",
+          description: "You closed the payment window. No charges were made.",
+          variant: "default",
+        });
+        setIsSubmitting(false);
+      },
+      callback: function (response: any) {
+        if (response.status === "success") {
+          // Verify payment on backend
+          verifyPayment(response.reference);
+        } else {
+          toast({
+            title: "Payment Failed",
+            description: "Your payment could not be processed. Please try again.",
+            variant: "destructive",
+          });
+        }
+        setIsSubmitting(false);
+      },
+    });
+
+    handler.openIframe();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form
     if (!formData.firstName || !formData.lastName || !formData.email) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
@@ -78,11 +200,29 @@ export default function Donate() {
       return;
     }
 
+    if (getFinalAmount() < 1) {
+      toast({
+        title: "Minimum Amount",
+        description: "Minimum donation amount is GH₵1.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!paystackLoaded) {
+      toast({
+        title: "Please Wait",
+        description: "Payment gateway is still loading. Please try again in a moment.",
+        variant: "default",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Submit donation to API
-      const response = await fetch("http://localhost:5000/api/donations", {
+      // Initialize payment with backend
+      const response = await fetch("http://localhost:5000/api/donations/initialize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,34 +233,24 @@ export default function Donate() {
           email: formData.email,
           amount: getFinalAmount(),
           type: donationType,
-          status: "completed",
-          currency: "GHS"
         }),
       });
 
-      if (response.ok) {
-        toast({
-          title: "Thank You!",
-          description: `Your ${donationType} donation of GH₵${getFinalAmount()} will help empower Ghana's youth.`,
-          variant: "default",
-        });
+      const data = await response.json();
 
-        // Reset form
-        setSelectedAmount(1000);
-        setCustomAmount("");
-        setDonationType("one-time");
-        setFormData({ firstName: "", lastName: "", email: "" });
+      if (response.ok && data.success) {
+        // Open Paystack payment modal
+        await handlePaystackPayment(data.data.authorizationUrl, data.data.reference);
       } else {
-        throw new Error("Failed to submit donation");
+        throw new Error(data.message || "Failed to initialize payment");
       }
-    } catch (error) {
-      console.error("Error submitting donation:", error);
+    } catch (error: any) {
+      console.error("Error initializing payment:", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Failed to initialize payment. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -141,7 +271,6 @@ export default function Donate() {
             </div>
             <h1 className="font-heading text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl">Make a Donation</h1>
             <p className="mt-6 text-lg text-primary-foreground/80">Your generosity empowers Ghana's next generation of innovators.</p>
-            
           </div>
         </div>
         
@@ -226,7 +355,7 @@ export default function Donate() {
                       <Label htmlFor="customAmount">Or enter custom amount</Label>
                       <div className="relative mt-2">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">GH₵</span>
-                        <Input id="customAmount" type="number" value={customAmount} onChange={handleCustomAmountChange} className="pl-12" placeholder="Enter amount" min="1" />
+                        <Input id="customAmount" type="number" value={customAmount} onChange={handleCustomAmountChange} className="pl-12" placeholder="Enter amount" min="1" step="0.01" />
                       </div>
                     </div>
                   </div>
@@ -249,10 +378,22 @@ export default function Donate() {
                     </div>
                   </div>
                   
-                  <Button type="submit" variant="hero" size="xl" className="w-full" disabled={isSubmitting || getFinalAmount() === 0}>
-                    {isSubmitting ? "Processing..." : (<><Heart className="mr-2 h-5 w-5" />Donate GH₵{getFinalAmount()} {donationType === "monthly" ? "/month" : ""}</>)}
+                  <Button type="submit" variant="hero" size="xl" className="w-full" disabled={isSubmitting || getFinalAmount() === 0 || !paystackLoaded}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="mr-2 h-5 w-5" />
+                        Donate GH₵{getFinalAmount()} {donationType === "monthly" ? "/month" : ""}
+                      </>
+                    )}
                   </Button>
-                  <p className="mt-4 text-center text-xs text-muted-foreground">Your donation is secure. You will receive a receipt via email.</p>
+                  <p className="mt-4 text-center text-xs text-muted-foreground">
+                    Secure payment powered by Paystack. You can pay with card or mobile money (MTN, AirtelTigo, Telecel).
+                  </p>
                 </form>
               </div>
             </div>
