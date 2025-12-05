@@ -85,7 +85,7 @@ export default function AdminEvents() {
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/events", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/events", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -105,8 +105,8 @@ export default function AdminEvents() {
     e.preventDefault();
     const token = localStorage.getItem("adminToken");
     const url = editingEvent
-      ? `http://localhost:5000/api/events/${editingEvent._id}`
-      : "http://localhost:5000/api/events";
+      ? `https://edans-impact-backend.onrender.com/api/events/${editingEvent._id}`
+      : "https://edans-impact-backend.onrender.com/api/events";
     const method = editingEvent ? "PUT" : "POST";
 
     try {
@@ -161,7 +161,7 @@ export default function AdminEvents() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/events/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -181,7 +181,7 @@ export default function AdminEvents() {
   const toggleStatus = async (id: string, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

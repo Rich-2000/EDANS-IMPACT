@@ -101,7 +101,7 @@ export default function Events() {
     const fetchEventsData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:5000/api/events");
+        const response = await fetch("https://edans-impact-backend.onrender.com/api/events");
         
         if (response.ok) {
           const data = await response.json();

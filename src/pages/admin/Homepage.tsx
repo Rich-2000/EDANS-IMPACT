@@ -81,7 +81,7 @@ export default function AdminHomepage() {
   const fetchHomepageData = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/homepage", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/homepage", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -103,7 +103,7 @@ export default function AdminHomepage() {
     setSaving(true);
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/homepage", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/homepage", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

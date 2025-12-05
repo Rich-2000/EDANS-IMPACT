@@ -152,7 +152,7 @@ export default function Contact() {
     
     try {
       // First, send to your API for storage
-      const apiResponse = await fetch("http://localhost:5000/api/contact", {
+      const apiResponse = await fetch("https://edans-impact-backend.onrender.com/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

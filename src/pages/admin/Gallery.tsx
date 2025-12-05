@@ -57,7 +57,7 @@ export default function AdminGallery() {
   const fetchGalleryItems = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/gallery", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/gallery", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -86,7 +86,7 @@ export default function AdminGallery() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/gallery/upload", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/gallery/upload", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -117,7 +117,7 @@ export default function AdminGallery() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/gallery/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

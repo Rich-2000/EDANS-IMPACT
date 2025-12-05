@@ -82,7 +82,7 @@ export default function Donate() {
 
   const verifyPayment = async (reference: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/donations/verify/${reference}`);
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/donations/verify/${reference}`);
       const data = await response.json();
 
       if (data.success && data.data.donation.status === "completed") {
@@ -222,7 +222,7 @@ export default function Donate() {
 
     try {
       // Initialize payment with backend
-      const response = await fetch("http://localhost:5000/api/donations/initialize", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/donations/initialize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

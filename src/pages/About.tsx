@@ -83,7 +83,7 @@ export default function About() {
     const fetchAboutData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:5000/api/about");
+        const response = await fetch("https://edans-impact-backend.onrender.com/api/about");
         
         if (response.ok) {
           const data = await response.json();

@@ -92,7 +92,7 @@ export default function Programs() {
         setIsLoading(true);
         
         // Fetch programs
-        const response = await fetch("http://localhost:5000/api/programs");
+        const response = await fetch("https://edans-impact-backend.onrender.com/api/programs");
         
         if (response.ok) {
           const data = await response.json();
@@ -111,7 +111,7 @@ export default function Programs() {
             })));
             
             // Generate upcoming programs from events
-            const eventsResponse = await fetch("http://localhost:5000/api/events");
+            const eventsResponse = await fetch("https://edans-impact-backend.onrender.com/api/events");
             if (eventsResponse.ok) {
               const eventsData = await eventsResponse.json();
               if (eventsData.data && eventsData.data.length > 0) {

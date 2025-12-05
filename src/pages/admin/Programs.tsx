@@ -44,7 +44,7 @@ export default function AdminPrograms() {
   const fetchPrograms = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/programs", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/programs", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -71,8 +71,8 @@ export default function AdminPrograms() {
 
     try {
       const url = editingProgram
-        ? `http://localhost:5000/api/programs/${editingProgram._id}`
-        : "http://localhost:5000/api/programs";
+        ? `https://edans-impact-backend.onrender.com/api/programs/${editingProgram._id}`
+        : "https://edans-impact-backend.onrender.com/api/programs";
 
       const response = await fetch(url, {
         method: editingProgram ? "PUT" : "POST",
@@ -118,7 +118,7 @@ export default function AdminPrograms() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/programs/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/programs/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

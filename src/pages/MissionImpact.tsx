@@ -101,9 +101,9 @@ export default function MissionImpact() {
         
         // Fetch impact data from multiple sources
         const [programsResponse, eventsResponse, aboutResponse] = await Promise.all([
-          fetch("http://localhost:5000/api/programs"),
-          fetch("http://localhost:5000/api/events"),
-          fetch("http://localhost:5000/api/about")
+          fetch("https://edans-impact-backend.onrender.com/api/programs"),
+          fetch("https://edans-impact-backend.onrender.com/api/events"),
+          fetch("https://edans-impact-backend.onrender.com/api/about")
         ]);
         
         if (programsResponse.ok && eventsResponse.ok) {

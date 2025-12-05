@@ -84,7 +84,7 @@ export default function AdminVolunteers() {
   const fetchVolunteers = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const url = new URL("http://localhost:5000/api/volunteer");
+      const url = new URL("https://edans-impact-backend.onrender.com/api/volunteer");
       if (filter !== "all") {
         url.searchParams.append("status", filter);
       }
@@ -108,7 +108,7 @@ export default function AdminVolunteers() {
   const updateStatus = async (id: string, status: string) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/volunteer/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/volunteer/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

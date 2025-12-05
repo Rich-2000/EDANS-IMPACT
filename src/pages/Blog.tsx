@@ -101,7 +101,7 @@ export default function Blog() {
     const fetchBlogData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:5000/api/blog");
+        const response = await fetch("https://edans-impact-backend.onrender.com/api/blog");
         
         if (response.ok) {
           const data = await response.json();

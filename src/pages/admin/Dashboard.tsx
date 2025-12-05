@@ -70,13 +70,13 @@ export default function AdminDashboard() {
 
       const [programs, events, blogs, gallery, contacts, volunteers, donations] =
         await Promise.all([
-          fetch("http://localhost:5000/api/programs", { headers }),
-          fetch("http://localhost:5000/api/events", { headers }),
-          fetch("http://localhost:5000/api/blog", { headers }),
-          fetch("http://localhost:5000/api/gallery", { headers }),
-          fetch("http://localhost:5000/api/contact", { headers }),
-          fetch("http://localhost:5000/api/volunteer", { headers }),
-          fetch("http://localhost:5000/api/donations", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/programs", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/events", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/blog", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/gallery", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/contact", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/volunteer", { headers }),
+          fetch("https://edans-impact-backend.onrender.com/api/donations", { headers }),
         ]);
 
       // Parse responses

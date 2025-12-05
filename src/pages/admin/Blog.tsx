@@ -77,7 +77,7 @@ export default function AdminBlog() {
   const fetchBlogPosts = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/blog", {
+      const response = await fetch("https://edans-impact-backend.onrender.com/api/blog", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -97,8 +97,8 @@ export default function AdminBlog() {
     e.preventDefault();
     const token = localStorage.getItem("adminToken");
     const url = editingPost
-      ? `http://localhost:5000/api/blog/${editingPost._id}`
-      : "http://localhost:5000/api/blog";
+      ? `https://edans-impact-backend.onrender.com/api/blog/${editingPost._id}`
+      : "https://edans-impact-backend.onrender.com/api/blog";
     const method = editingPost ? "PUT" : "POST";
 
     try {
@@ -152,7 +152,7 @@ export default function AdminBlog() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/blog/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/blog/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -172,7 +172,7 @@ export default function AdminBlog() {
   const togglePublish = async (id: string, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/blog/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/blog/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

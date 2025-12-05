@@ -84,7 +84,7 @@ export default function Index() {
         setIsLoading(true);
         
         // Fetch homepage content
-        const homepageResponse = await fetch("http://localhost:5000/api/homepage");
+        const homepageResponse = await fetch("https://edans-impact-backend.onrender.com/api/homepage");
         if (homepageResponse.ok) {
           const homepageData = await homepageResponse.json();
           if (!homepageData.isFallback && homepageData.data) {
@@ -114,7 +114,7 @@ export default function Index() {
         }
 
         // Fetch programs
-        const programsResponse = await fetch("http://localhost:5000/api/programs");
+        const programsResponse = await fetch("https://edans-impact-backend.onrender.com/api/programs");
         if (programsResponse.ok) {
           const programsData = await programsResponse.json();
           if (programsData.data && programsData.data.length > 0) {
@@ -129,7 +129,7 @@ export default function Index() {
         }
 
         // Fetch events
-        const eventsResponse = await fetch("http://localhost:5000/api/events");
+        const eventsResponse = await fetch("https://edans-impact-backend.onrender.com/api/events");
         if (eventsResponse.ok) {
           const eventsData = await eventsResponse.json();
           if (eventsData.data && eventsData.data.length > 0) {

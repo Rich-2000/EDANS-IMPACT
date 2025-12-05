@@ -250,7 +250,7 @@ export default function Volunteer() {
     
     try {
       // First, send to your API for storage
-      const apiResponse = await fetch("http://localhost:5000/api/volunteer", {
+      const apiResponse = await fetch("https://edans-impact-backend.onrender.com/api/volunteer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -86,7 +86,7 @@ export default function AdminDonations() {
   const fetchDonations = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const url = new URL("http://localhost:5000/api/donations");
+      const url = new URL("https://edans-impact-backend.onrender.com/api/donations");
       if (filter !== "all") {
         url.searchParams.append("status", filter);
       }
@@ -110,7 +110,7 @@ export default function AdminDonations() {
   const updateStatus = async (id: string, status: string) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/donations/${id}`, {
+      const response = await fetch(`https://edans-impact-backend.onrender.com/api/donations/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
