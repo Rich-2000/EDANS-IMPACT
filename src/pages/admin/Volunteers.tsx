@@ -206,347 +206,448 @@ export default function AdminVolunteers() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">
-            Volunteer Applications
-          </h1>
-          <p className="text-muted-foreground">
-            Review and manage volunteer applications
-          </p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl break-words">
+              Volunteer Applications
+            </h1>
+            <p className="text-sm text-muted-foreground sm:text-base break-words">
+              Review and manage volunteer applications
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button 
+              variant="outline" 
+              onClick={exportToCSV}
+              className="w-full sm:w-auto whitespace-nowrap"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-0"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={exportToCSV}>
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground sm:text-sm truncate">Total</p>
+                  <p className="text-xl font-bold sm:text-2xl">{volunteers.length}</p>
+                </div>
+                <div className="rounded-full bg-blue-100 p-2 sm:p-3 flex-shrink-0">
+                  <User className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground sm:text-sm truncate">Pending</p>
+                  <p className="text-xl font-bold sm:text-2xl">
+                    {volunteers.filter((v) => v.status === "pending").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-yellow-100 p-2 sm:p-3 flex-shrink-0">
+                  <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground sm:text-sm truncate">Approved</p>
+                  <p className="text-xl font-bold sm:text-2xl">
+                    {volunteers.filter((v) => v.status === "approved").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-green-100 p-2 sm:p-3 flex-shrink-0">
+                  <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground sm:text-sm truncate">Rejected</p>
+                  <p className="text-xl font-bold sm:text-2xl">
+                    {volunteers.filter((v) => v.status === "rejected").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-red-100 p-2 sm:p-3 flex-shrink-0">
+                  <XCircle className="h-4 w-4 sm:h-6 sm:w-6 text-red-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{volunteers.length}</p>
-              </div>
-              <div className="rounded-full bg-blue-100 p-3">
-                <User className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
+        {/* Volunteers Table - Desktop View */}
+        <Card className="hidden lg:block">
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap">Name</TableHead>
+                  <TableHead className="whitespace-nowrap">Contact</TableHead>
+                  <TableHead className="whitespace-nowrap">Occupation</TableHead>
+                  <TableHead className="whitespace-nowrap">Skills</TableHead>
+                  <TableHead className="whitespace-nowrap">Status</TableHead>
+                  <TableHead className="whitespace-nowrap">Applied</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {volunteers.map((volunteer) => (
+                  <TableRow key={volunteer._id}>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      {volunteer.firstName} {volunteer.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-sm truncate max-w-[200px]">{volunteer.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-3 w-3 flex-shrink-0" />
+                          <span className="text-sm whitespace-nowrap">{volunteer.phone}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate max-w-[150px]">{volunteer.occupation}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-[200px]">
+                        <div className="flex flex-wrap gap-1">
+                          {volunteer.skills.slice(0, 3).map((skill) => (
+                            <span
+                              key={skill}
+                              className="rounded-full bg-muted px-2 py-1 text-xs whitespace-nowrap"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {volunteer.skills.length > 3 && (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              +{volunteer.skills.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`flex w-24 items-center justify-center gap-2 whitespace-nowrap ${
+                          statusColors[volunteer.status]
+                        }`}
+                      >
+                        {getStatusIcon(volunteer.status)}
+                        {volunteer.status.charAt(0).toUpperCase() +
+                          volunteer.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-sm whitespace-nowrap">
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
+                        {new Date(volunteer.createdAt).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => viewDetails(volunteer)}
+                          className="whitespace-nowrap"
+                        >
+                          View
+                        </Button>
+                        <select
+                          value={volunteer.status}
+                          onChange={(e) =>
+                            updateStatus(volunteer._id, e.target.value)
+                          }
+                          className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="reviewed">Reviewed</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold">
-                  {volunteers.filter((v) => v.status === "pending").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-yellow-100 p-3">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Approved</p>
-                <p className="text-2xl font-bold">
-                  {volunteers.filter((v) => v.status === "approved").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-green-100 p-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Rejected</p>
-                <p className="text-2xl font-bold">
-                  {volunteers.filter((v) => v.status === "rejected").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-red-100 p-3">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Volunteers Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Occupation</TableHead>
-                <TableHead>Skills</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Applied</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {volunteers.map((volunteer) => (
-                <TableRow key={volunteer._id}>
-                  <TableCell className="font-medium">
-                    {volunteer.firstName} {volunteer.lastName}
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3" />
-                        <span className="text-sm">{volunteer.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3" />
-                        <span className="text-sm">{volunteer.phone}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-3 w-3" />
-                      {volunteer.occupation}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="max-w-[200px]">
-                      <div className="flex flex-wrap gap-1">
-                        {volunteer.skills.slice(0, 3).map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-full bg-muted px-2 py-1 text-xs"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        {volunteer.skills.length > 3 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{volunteer.skills.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
+        {/* Volunteers Cards - Mobile View */}
+        <div className="lg:hidden space-y-4">
+          {volunteers.map((volunteer) => (
+            <Card key={volunteer._id} className="overflow-hidden">
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-lg break-words">
+                      {volunteer.firstName} {volunteer.lastName}
+                    </h3>
                     <Badge
                       variant="outline"
-                      className={`flex w-24 items-center justify-center gap-2 ${
+                      className={`inline-flex items-center gap-1 mt-2 ${
                         statusColors[volunteer.status]
                       }`}
                     >
                       {getStatusIcon(volunteer.status)}
-                      {volunteer.status.charAt(0).toUpperCase() +
-                        volunteer.status.slice(1)}
+                      <span className="text-xs">
+                        {volunteer.status.charAt(0).toUpperCase() +
+                          volunteer.status.slice(1)}
+                      </span>
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(volunteer.createdAt).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => viewDetails(volunteer)}
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <Mail className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                    <span className="break-all">{volunteer.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    <span>{volunteer.phone}</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Briefcase className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                    <span className="break-words">{volunteer.occupation}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    <span>{new Date(volunteer.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Skills:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {volunteer.skills.slice(0, 5).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full bg-muted px-2 py-1 text-xs break-words"
                       >
-                        View
-                      </Button>
+                        {skill}
+                      </span>
+                    ))}
+                    {volunteer.skills.length > 5 && (
+                      <span className="text-xs text-muted-foreground self-center">
+                        +{volunteer.skills.length - 5} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => viewDetails(volunteer)}
+                    className="w-full"
+                  >
+                    View Details
+                  </Button>
+                  <select
+                    value={volunteer.status}
+                    onChange={(e) =>
+                      updateStatus(volunteer._id, e.target.value)
+                    }
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Details Dialog */}
+        <Dialog open={showDetails} onOpenChange={setShowDetails}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+            {selectedVolunteer && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="break-words">Volunteer Application Details</DialogTitle>
+                  <DialogDescription className="break-words">
+                    Applied on{" "}
+                    {new Date(selectedVolunteer.createdAt).toLocaleString()}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Full Name
+                      </h4>
+                      <p className="text-lg break-words">
+                        {selectedVolunteer.firstName} {selectedVolunteer.lastName}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Date of Birth
+                      </h4>
+                      <p className="text-lg break-words">
+                        {new Date(selectedVolunteer.dateOfBirth).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Email
+                      </h4>
+                      <p className="text-lg break-all">{selectedVolunteer.email}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Phone
+                      </h4>
+                      <p className="text-lg break-words">{selectedVolunteer.phone}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Occupation
+                      </h4>
+                      <p className="text-lg break-words">{selectedVolunteer.occupation}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Education
+                      </h4>
+                      <p className="text-lg break-words">{selectedVolunteer.education}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">Skills</h4>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedVolunteer.skills.map((skill) => (
+                          <Badge key={skill} variant="secondary" className="break-words">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Availability
+                      </h4>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedVolunteer.availability.map((day) => (
+                          <Badge key={day} variant="outline" className="break-words">
+                            {day}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Motivation
+                    </h4>
+                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
+                      <p className="whitespace-pre-wrap break-words">{selectedVolunteer.motivation}</p>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Experience
+                    </h4>
+                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
+                      <p className="whitespace-pre-wrap break-words">{selectedVolunteer.experience}</p>
+                    </div>
+                  </div>
+
+                  {selectedVolunteer.notes && (
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Admin Notes
+                      </h4>
+                      <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
+                        <p className="whitespace-pre-wrap break-words">{selectedVolunteer.notes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Update Status
+                    </h4>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-2">
                       <select
-                        value={volunteer.status}
+                        value={selectedVolunteer.status}
                         onChange={(e) =>
-                          updateStatus(volunteer._id, e.target.value)
+                          updateStatus(selectedVolunteer._id, e.target.value)
                         }
-                        className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                        className="flex-1 rounded-md border border-input bg-background px-3 py-2 min-w-0"
                       >
                         <option value="pending">Pending</option>
                         <option value="reviewed">Reviewed</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                       </select>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedVolunteer && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Volunteer Application Details</DialogTitle>
-                <DialogDescription>
-                  Applied on{" "}
-                  {new Date(selectedVolunteer.createdAt).toLocaleString()}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Full Name
-                    </h4>
-                    <p className="text-lg">
-                      {selectedVolunteer.firstName} {selectedVolunteer.lastName}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Date of Birth
-                    </h4>
-                    <p className="text-lg">
-                      {new Date(selectedVolunteer.dateOfBirth).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Email
-                    </h4>
-                    <p className="text-lg">{selectedVolunteer.email}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Phone
-                    </h4>
-                    <p className="text-lg">{selectedVolunteer.phone}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Occupation
-                    </h4>
-                    <p className="text-lg">{selectedVolunteer.occupation}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Education
-                    </h4>
-                    <p className="text-lg">{selectedVolunteer.education}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Skills</h4>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedVolunteer.skills.map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Availability
-                    </h4>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedVolunteer.availability.map((day) => (
-                        <Badge key={day} variant="outline">
-                          {day}
-                        </Badge>
-                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          (window.location.href = `mailto:${selectedVolunteer.email}`)
+                        }
+                        className="whitespace-nowrap"
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Contact Volunteer
+                      </Button>
                     </div>
                   </div>
                 </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Motivation
-                  </h4>
-                  <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
-                    <p className="whitespace-pre-wrap">{selectedVolunteer.motivation}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Experience
-                  </h4>
-                  <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
-                    <p className="whitespace-pre-wrap">{selectedVolunteer.experience}</p>
-                  </div>
-                </div>
-
-                {selectedVolunteer.notes && (
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Admin Notes
-                    </h4>
-                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
-                      <p className="whitespace-pre-wrap">{selectedVolunteer.notes}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Update Status
-                  </h4>
-                  <div className="mt-2 flex gap-2">
-                    <select
-                      value={selectedVolunteer.status}
-                      onChange={(e) =>
-                        updateStatus(selectedVolunteer._id, e.target.value)
-                      }
-                      className="flex-1 rounded-md border border-input bg-background px-3 py-2"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="reviewed">Reviewed</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        (window.location.href = `mailto:${selectedVolunteer.email}`)
-                      }
-                    >
-                      <Mail className="mr-2 h-4 w-4" />
-                      Contact Volunteer
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
