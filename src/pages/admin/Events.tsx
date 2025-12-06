@@ -221,244 +221,256 @@ export default function AdminEvents() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">Events</h1>
-          <p className="text-muted-foreground">Manage upcoming and past events</p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground break-words">Events</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage upcoming and past events</p>
+          </div>
+          <Button variant="primary-gradient" onClick={() => setShowModal(true)} className="w-full sm:w-auto shrink-0">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Event
+          </Button>
         </div>
-        <Button variant="primary-gradient" onClick={() => setShowModal(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Event
-        </Button>
-      </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {events.map((event) => (
-                  <TableRow key={event._id}>
-                    <TableCell>
-                      <div className="font-medium">{event.title}</div>
-                      <div className="text-sm text-muted-foreground line-clamp-1">
-                        {event.description.substring(0, 60)}...
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(event.date).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-muted-foreground">{event.time}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        {event.location}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{event.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={event.isActive ? "default" : "secondary"}>
-                        {event.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleStatus(event._id, event.isActive)}
-                        >
-                          {event.isActive ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(event)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(event._id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <Card className="w-full">
+            <CardContent className="p-0 overflow-x-auto">
+              <div className="min-w-[900px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {events.map((event) => (
+                      <TableRow key={event._id}>
+                        <TableCell>
+                          <div className="font-medium break-words max-w-[200px]">{event.title}</div>
+                          <div className="text-sm text-muted-foreground line-clamp-1 break-words">
+                            {event.description.substring(0, 60)}...
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 whitespace-nowrap">
+                            <Calendar className="h-4 w-4 shrink-0" />
+                            {new Date(event.date).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-muted-foreground">{event.time}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 shrink-0" />
+                            <span className="break-words max-w-[150px]">{event.location}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{event.category}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={event.isActive ? "default" : "secondary"}>
+                            {event.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2 flex-nowrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleStatus(event._id, event.isActive)}
+                            >
+                              {event.isActive ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEdit(event)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDelete(event._id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingEvent ? "Edit Event" : "Add New Event"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingEvent ? "Edit Event" : "Add New Event"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Label>Title *</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2 min-w-0">
+                  <Label>Category *</Label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    required
+                  >
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input
-                  value={formData.title}
+                <Label>Description *</Label>
+                <Textarea
+                  value={formData.description}
                   onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                   }
+                  rows={4}
                   required
+                  className="w-full resize-none"
                 />
               </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Label>Date *</Label>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, date: e.target.value })
+                    }
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2 min-w-0">
+                  <Label>Time *</Label>
+                  <Input
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) =>
+                      setFormData({ ...formData, time: e.target.value })
+                    }
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2 min-w-0 col-span-2 md:col-span-1">
+                  <Label>Max Participants</Label>
+                  <Input
+                    type="number"
+                    value={formData.maxParticipants}
+                    onChange={(e) =>
+                      setFormData({ ...formData, maxParticipants: e.target.value })
+                    }
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label>Category *</Label>
-                <select
-                  value={formData.category}
+                <Label>Location *</Label>
+                <Input
+                  value={formData.location}
                   onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                    setFormData({ ...formData, location: e.target.value })
                   }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   required
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Image URL (optional)</Label>
+                <Input
+                  value={formData.image}
+                  onChange={(e) =>
+                    setFormData({ ...formData, image: e.target.value })
+                  }
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isActive" className="cursor-pointer">
+                  Active (visible to public)
+                </Label>
+              </div>
+
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="w-full sm:w-auto"
                 >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Description *</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Date *</Label>
-                <Input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Time *</Label>
-                <Input
-                  type="time"
-                  value={formData.time}
-                  onChange={(e) =>
-                    setFormData({ ...formData, time: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Max Participants</Label>
-                <Input
-                  type="number"
-                  value={formData.maxParticipants}
-                  onChange={(e) =>
-                    setFormData({ ...formData, maxParticipants: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Location *</Label>
-              <Input
-                value={formData.location}
-                onChange={(e) =>
-                  setFormData({ ...formData, location: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Image URL (optional)</Label>
-              <Input
-                value={formData.image}
-                onChange={(e) =>
-                  setFormData({ ...formData, image: e.target.value })
-                }
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) =>
-                  setFormData({ ...formData, isActive: e.target.checked })
-                }
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="isActive" className="cursor-pointer">
-                Active (visible to public)
-              </Label>
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowModal(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary-gradient">
-                {editingEvent ? "Update" : "Create"} Event
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary-gradient" className="w-full sm:w-auto">
+                  {editingEvent ? "Update" : "Create"} Event
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

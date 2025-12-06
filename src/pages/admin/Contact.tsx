@@ -146,7 +146,6 @@ export default function AdminContact() {
     setSelectedSubmission(submission);
     setShowDetails(true);
 
-    // Mark as read if status is new
     if (submission.status === "new") {
       updateStatus(submission._id, "read");
     }
@@ -161,266 +160,271 @@ export default function AdminContact() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">
-            Contact Submissions
-          </h1>
-          <p className="text-muted-foreground">
-            Manage inquiries and messages from visitors
-          </p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground break-words">
+              Contact Submissions
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage inquiries and messages from visitors
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm w-full sm:w-auto"
+            >
+              <option value="all">All Status</option>
+              <option value="new">New</option>
+              <option value="read">Read</option>
+              <option value="replied">Replied</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="new">New</option>
-            <option value="read">Read</option>
-            <option value="replied">Replied</option>
-            <option value="archived">Archived</option>
-          </select>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold">{submissions.length}</p>
+                </div>
+                <div className="rounded-full bg-blue-100 p-3 shrink-0">
+                  <Mail className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">New</p>
+                  <p className="text-2xl font-bold">
+                    {submissions.filter((s) => s.status === "new").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-green-100 p-3 shrink-0">
+                  <Clock className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Replied</p>
+                  <p className="text-2xl font-bold">
+                    {submissions.filter((s) => s.status === "replied").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-green-100 p-3 shrink-0">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Archived</p>
+                  <p className="text-2xl font-bold">
+                    {submissions.filter((s) => s.status === "archived").length}
+                  </p>
+                </div>
+                <div className="rounded-full bg-yellow-100 p-3 shrink-0">
+                  <XCircle className="h-6 w-6 text-yellow-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{submissions.length}</p>
-              </div>
-              <div className="rounded-full bg-blue-100 p-3">
-                <Mail className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">New</p>
-                <p className="text-2xl font-bold">
-                  {submissions.filter((s) => s.status === "new").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-green-100 p-3">
-                <Clock className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Replied</p>
-                <p className="text-2xl font-bold">
-                  {submissions.filter((s) => s.status === "replied").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-green-100 p-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Archived</p>
-                <p className="text-2xl font-bold">
-                  {submissions.filter((s) => s.status === "archived").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-yellow-100 p-3">
-                <XCircle className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Submissions Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {submissions.map((submission) => (
-                <TableRow key={submission._id}>
-                  <TableCell className="font-medium">{submission.name}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3" />
-                        <span className="text-sm">{submission.email}</span>
-                      </div>
-                      {submission.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3" />
-                          <span className="text-sm">{submission.phone}</span>
+        {/* Submissions Table */}
+        <Card className="w-full">
+          <CardContent className="p-0 overflow-x-auto">
+            <div className="min-w-[800px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {submissions.map((submission) => (
+                    <TableRow key={submission._id}>
+                      <TableCell className="font-medium">{submission.name}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span className="text-sm break-all">{submission.email}</span>
+                          </div>
+                          {submission.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-3 w-3 shrink-0" />
+                              <span className="text-sm">{submission.phone}</span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-[200px] truncate">{submission.subject}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`flex w-24 items-center justify-center gap-2 ${
+                            statusColors[submission.status]
+                          }`}
+                        >
+                          {getStatusIcon(submission.status)}
+                          {submission.status.charAt(0).toUpperCase() +
+                            submission.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm whitespace-nowrap">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(submission.createdAt).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => viewDetails(submission)}
+                          >
+                            View
+                          </Button>
+                          <select
+                            value={submission.status}
+                            onChange={(e) =>
+                              updateStatus(submission._id, e.target.value)
+                            }
+                            className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                          >
+                            <option value="new">New</option>
+                            <option value="read">Read</option>
+                            <option value="replied">Replied</option>
+                            <option value="archived">Archived</option>
+                          </select>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Details Dialog */}
+        <Dialog open={showDetails} onOpenChange={setShowDetails}>
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
+            {selectedSubmission && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Contact Submission Details</DialogTitle>
+                  <DialogDescription>
+                    Submitted on{" "}
+                    {new Date(selectedSubmission.createdAt).toLocaleString()}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">Name</h4>
+                      <p className="text-lg break-words">{selectedSubmission.name}</p>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="max-w-[200px] truncate">{submission.subject}</div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`flex w-24 items-center justify-center gap-2 ${
-                        statusColors[submission.status]
-                      }`}
-                    >
-                      {getStatusIcon(submission.status)}
-                      {submission.status.charAt(0).toUpperCase() +
-                        submission.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(submission.createdAt).toLocaleDateString()}
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
+                      <p className="text-lg break-all">{selectedSubmission.email}</p>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
+                    {selectedSubmission.phone && (
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-medium text-muted-foreground">
+                          Phone
+                        </h4>
+                        <p className="text-lg">{selectedSubmission.phone}</p>
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        Current Status
+                      </h4>
+                      <Badge
                         variant="outline"
-                        onClick={() => viewDetails(submission)}
+                        className={`mt-1 ${statusColors[selectedSubmission.status]}`}
                       >
-                        View
-                      </Button>
+                        {selectedSubmission.status.charAt(0).toUpperCase() +
+                          selectedSubmission.status.slice(1)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">Subject</h4>
+                    <p className="text-lg font-medium break-words">{selectedSubmission.subject}</p>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">Message</h4>
+                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
+                      <p className="whitespace-pre-wrap break-words">{selectedSubmission.message}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Update Status
+                    </h4>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-2">
                       <select
-                        value={submission.status}
+                        value={selectedSubmission.status}
                         onChange={(e) =>
-                          updateStatus(submission._id, e.target.value)
+                          updateStatus(selectedSubmission._id, e.target.value)
                         }
-                        className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                        className="flex-1 rounded-md border border-input bg-background px-3 py-2"
                       >
                         <option value="new">New</option>
                         <option value="read">Read</option>
                         <option value="replied">Replied</option>
                         <option value="archived">Archived</option>
                       </select>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          (window.location.href = `mailto:${selectedSubmission.email}?subject=Re: ${selectedSubmission.subject}`)
+                        }
+                        className="sm:w-auto"
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Reply via Email
+                      </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
-          {selectedSubmission && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Contact Submission Details</DialogTitle>
-                <DialogDescription>
-                  Submitted on{" "}
-                  {new Date(selectedSubmission.createdAt).toLocaleString()}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Name</h4>
-                    <p className="text-lg">{selectedSubmission.name}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-                    <p className="text-lg">{selectedSubmission.email}</p>
-                  </div>
-                  {selectedSubmission.phone && (
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Phone
-                      </h4>
-                      <p className="text-lg">{selectedSubmission.phone}</p>
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Current Status
-                    </h4>
-                    <Badge
-                      variant="outline"
-                      className={`mt-1 ${statusColors[selectedSubmission.status]}`}
-                    >
-                      {selectedSubmission.status.charAt(0).toUpperCase() +
-                        selectedSubmission.status.slice(1)}
-                    </Badge>
                   </div>
                 </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Subject</h4>
-                  <p className="text-lg font-medium">{selectedSubmission.subject}</p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Message</h4>
-                  <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
-                    <p className="whitespace-pre-wrap">{selectedSubmission.message}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Update Status
-                  </h4>
-                  <div className="mt-2 flex gap-2">
-                    <select
-                      value={selectedSubmission.status}
-                      onChange={(e) =>
-                        updateStatus(selectedSubmission._id, e.target.value)
-                      }
-                      className="flex-1 rounded-md border border-input bg-background px-3 py-2"
-                    >
-                      <option value="new">New</option>
-                      <option value="read">Read</option>
-                      <option value="replied">Replied</option>
-                      <option value="archived">Archived</option>
-                    </select>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        (window.location.href = `mailto:${selectedSubmission.email}?subject=Re: ${selectedSubmission.subject}`)
-                      }
-                    >
-                      <Mail className="mr-2 h-4 w-4" />
-                      Reply via Email
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

@@ -76,13 +76,13 @@ export default function AdminLogin() {
         <div className="w-full max-w-md">
           {/* Logo and Title */}
           <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex items-center justify-center">
+            <div className="mb-4 inline-flex items-center justify-center gap-3">
               <img src={logo} alt="Edan's Impact" className="h-16 w-16 object-contain" />
+              <h1 className="font-heading text-3xl font-bold text-foreground">
+                <span className="text-primary">EDANS</span>{" "}
+                <span className="text-secondary">Impact</span>
+              </h1>
             </div>
-            <h1 className="font-heading text-3xl font-bold text-foreground">
-              <span className="text-primary">EDANS</span>{" "}
-              <span className="text-secondary">Impact</span>
-            </h1>
             <p className="mt-2 text-sm text-muted-foreground">Admin Dashboard Login</p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
               <Sparkles className="h-3 w-3 text-primary" />
@@ -168,7 +168,7 @@ export default function AdminLogin() {
 
           {/* Footer */}
           <div className="mt-6 text-center text-xs text-muted-foreground">
-            © 2024 Edan's Impact. All rights reserved.
+            © 2026 EDANS Impact. All rights reserved.
           </div>
         </div>
       </div>

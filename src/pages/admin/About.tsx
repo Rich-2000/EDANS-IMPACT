@@ -202,7 +202,6 @@ export default function AdminAbout() {
     const [movedValue] = updatedValues.splice(index, 1);
     updatedValues.splice(newIndex, 0, movedValue);
 
-    // Update order
     updatedValues.forEach((value, i) => {
       value.order = i + 1;
     });
@@ -251,7 +250,6 @@ export default function AdminAbout() {
     const [movedMember] = updatedTeam.splice(index, 1);
     updatedTeam.splice(newIndex, 0, movedMember);
 
-    // Update order
     updatedTeam.forEach((member, i) => {
       member.order = i + 1;
     });
@@ -268,256 +266,266 @@ export default function AdminAbout() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">About Page</h1>
-          <p className="text-muted-foreground">Manage about page content</p>
-        </div>
-        <Button variant="primary-gradient" onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          Save Changes
-        </Button>
-      </div>
-
-      {/* Story Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Our Story</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={aboutData.story}
-            onChange={(e) => updateStory(e.target.value)}
-            rows={8}
-            placeholder="Tell your organization's story..."
-            className="min-h-[200px]"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Values Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Our Values</CardTitle>
-          <Button size="sm" variant="outline" onClick={addValue}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Value
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground break-words">About Page</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage about page content</p>
+          </div>
+          <Button variant="primary-gradient" onClick={handleSave} disabled={saving} className="w-full sm:w-auto shrink-0">
+            {saving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Save Changes
           </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {aboutData.values.map((value, index) => (
-              <div
-                key={value.id || index}
-                className="rounded-lg border border-border p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 grid grid-cols-3 gap-4">
-                    <div>
-                      <Label>Title</Label>
-                      <Input
-                        value={value.title}
-                        onChange={(e) =>
-                          updateValue(index, "title", e.target.value)
-                        }
-                        placeholder="Innovation"
-                      />
+        </div>
+
+        {/* Story Section */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Our Story</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={aboutData.story}
+              onChange={(e) => updateStory(e.target.value)}
+              rows={8}
+              placeholder="Tell your organization's story..."
+              className="min-h-[200px] w-full resize-none"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Values Section */}
+        <Card className="w-full">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="text-lg sm:text-xl">Our Values</CardTitle>
+            <Button size="sm" variant="outline" onClick={addValue} className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Value
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {aboutData.values.map((value, index) => (
+                <div
+                  key={value.id || index}
+                  className="rounded-lg border border-border p-4 w-full"
+                >
+                  <div className="flex flex-col gap-4">
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <Label className="text-sm">Title</Label>
+                        <Input
+                          value={value.title}
+                          onChange={(e) =>
+                            updateValue(index, "title", e.target.value)
+                          }
+                          placeholder="Innovation"
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="md:col-span-2 w-full min-w-0">
+                        <Label className="text-sm">Description</Label>
+                        <Input
+                          value={value.description}
+                          onChange={(e) =>
+                            updateValue(index, "description", e.target.value)
+                          }
+                          placeholder="Fostering creative thinking..."
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="w-full min-w-0">
+                        <Label className="text-sm">Icon</Label>
+                        <select
+                          value={value.icon}
+                          onChange={(e) =>
+                            updateValue(index, "icon", e.target.value)
+                          }
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                          {availableIcons.map((icon) => (
+                            <option key={icon} value={icon}>
+                              {icon}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full min-w-0">
+                        <Label className="text-sm">Order</Label>
+                        <Input
+                          type="number"
+                          value={value.order}
+                          onChange={(e) =>
+                            updateValue(index, "order", e.target.value)
+                          }
+                          className="w-full max-w-[100px]"
+                        />
+                      </div>
                     </div>
-                    <div className="col-span-2">
-                      <Label>Description</Label>
-                      <Input
-                        value={value.description}
-                        onChange={(e) =>
-                          updateValue(index, "description", e.target.value)
-                        }
-                        placeholder="Fostering creative thinking..."
-                      />
-                    </div>
-                    <div>
-                      <Label>Icon</Label>
-                      <select
-                        value={value.icon}
-                        onChange={(e) =>
-                          updateValue(index, "icon", e.target.value)
-                        }
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveValue(index, "up")}
+                        disabled={index === 0}
                       >
-                        {availableIcons.map((icon) => (
-                          <option key={icon} value={icon}>
-                            {icon}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <Label>Order</Label>
-                      <Input
-                        type="number"
-                        value={value.order}
-                        onChange={(e) =>
-                          updateValue(index, "order", e.target.value)
-                        }
-                        className="w-20"
-                      />
+                        ↑
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => moveValue(index, "down")}
+                        disabled={index === aboutData.values.length - 1}
+                      >
+                        ↓
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeValue(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="ml-4 flex flex-col gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => moveValue(index, "up")}
-                      disabled={index === 0}
-                    >
-                      ↑
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => moveValue(index, "down")}
-                      disabled={index === aboutData.values.length - 1}
-                    >
-                      ↓
-                    </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Team Section */}
+        <Card className="w-full">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="text-lg sm:text-xl">Our Team</CardTitle>
+            <Button size="sm" variant="outline" onClick={addTeamMember} className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Team Member
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+              {aboutData.team.map((member, index) => (
+                <div
+                  key={member.id || index}
+                  className="rounded-lg border border-border p-4 w-full min-w-0"
+                >
+                  <div className="flex flex-col gap-4">
+                    <div className="flex-1 space-y-4 w-full min-w-0">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="w-full min-w-0">
+                          <Label className="text-sm">Name</Label>
+                          <Input
+                            value={member.name}
+                            onChange={(e) =>
+                              updateTeamMember(index, "name", e.target.value)
+                            }
+                            placeholder="John Doe"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="w-full min-w-0">
+                          <Label className="text-sm">Role</Label>
+                          <Input
+                            value={member.role}
+                            onChange={(e) =>
+                              updateTeamMember(index, "role", e.target.value)
+                            }
+                            placeholder="Executive Director"
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                      <div className="w-full min-w-0">
+                        <Label className="text-sm">Bio</Label>
+                        <Textarea
+                          value={member.bio}
+                          onChange={(e) =>
+                            updateTeamMember(index, "bio", e.target.value)
+                          }
+                          placeholder="Brief biography..."
+                          rows={2}
+                          className="w-full resize-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="w-full min-w-0">
+                          <Label className="text-sm">Image URL</Label>
+                          <Input
+                            value={member.image}
+                            onChange={(e) =>
+                              updateTeamMember(index, "image", e.target.value)
+                            }
+                            placeholder="https://example.com/photo.jpg"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="w-full min-w-0">
+                          <Label className="text-sm">LinkedIn</Label>
+                          <Input
+                            value={member.linkedin}
+                            onChange={(e) =>
+                              updateTeamMember(index, "linkedin", e.target.value)
+                            }
+                            placeholder="https://linkedin.com/in/username"
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="w-full sm:w-auto min-w-0">
+                          <Label className="text-sm">Order</Label>
+                          <Input
+                            type="number"
+                            value={member.order}
+                            onChange={(e) =>
+                              updateTeamMember(index, "order", e.target.value)
+                            }
+                            className="w-full max-w-[100px]"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveTeamMember(index, "up")}
+                            disabled={index === 0}
+                          >
+                            ↑
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveTeamMember(index, "down")}
+                            disabled={index === aboutData.team.length - 1}
+                          >
+                            ↓
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeValue(index)}
-                      className="text-destructive hover:text-destructive"
+                      onClick={() => removeTeamMember(index)}
+                      className="text-destructive hover:text-destructive w-full sm:w-auto"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
                     </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Team Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Our Team</CardTitle>
-          <Button size="sm" variant="outline" onClick={addTeamMember}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Team Member
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {aboutData.team.map((member, index) => (
-              <div
-                key={member.id || index}
-                className="rounded-lg border border-border p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Name</Label>
-                        <Input
-                          value={member.name}
-                          onChange={(e) =>
-                            updateTeamMember(index, "name", e.target.value)
-                          }
-                          placeholder="John Doe"
-                        />
-                      </div>
-                      <div>
-                        <Label>Role</Label>
-                        <Input
-                          value={member.role}
-                          onChange={(e) =>
-                            updateTeamMember(index, "role", e.target.value)
-                          }
-                          placeholder="Executive Director"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Bio</Label>
-                      <Textarea
-                        value={member.bio}
-                        onChange={(e) =>
-                          updateTeamMember(index, "bio", e.target.value)
-                        }
-                        placeholder="Brief biography..."
-                        rows={2}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Image URL</Label>
-                        <Input
-                          value={member.image}
-                          onChange={(e) =>
-                            updateTeamMember(index, "image", e.target.value)
-                          }
-                          placeholder="https://example.com/photo.jpg"
-                        />
-                      </div>
-                      <div>
-                        <Label>LinkedIn</Label>
-                        <Input
-                          value={member.linkedin}
-                          onChange={(e) =>
-                            updateTeamMember(index, "linkedin", e.target.value)
-                          }
-                          placeholder="https://linkedin.com/in/username"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <Label>Order</Label>
-                        <Input
-                          type="number"
-                          value={member.order}
-                          onChange={(e) =>
-                            updateTeamMember(index, "order", e.target.value)
-                          }
-                          className="w-20"
-                        />
-                      </div>
-                      <div className="flex gap-2 mt-6">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => moveTeamMember(index, "up")}
-                          disabled={index === 0}
-                        >
-                          ↑
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => moveTeamMember(index, "down")}
-                          disabled={index === aboutData.team.length - 1}
-                        >
-                          ↓
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeTeamMember(index)}
-                    className="ml-4 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

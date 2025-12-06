@@ -232,278 +232,287 @@ export default function AdminBlog() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">Blog</h1>
-          <p className="text-muted-foreground">Manage blog posts and articles</p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground break-words">Blog</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage blog posts and articles</p>
+          </div>
+          <Button variant="primary-gradient" onClick={() => setShowModal(true)} className="w-full sm:w-auto shrink-0">
+            <Plus className="mr-2 h-4 w-4" />
+            New Post
+          </Button>
         </div>
-        <Button variant="primary-gradient" onClick={() => setShowModal(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Post
-        </Button>
-      </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <Card key={post._id} className="overflow-hidden">
-              {post.featuredImage && (
-                <img
-                  src={post.featuredImage}
-                  alt={post.title}
-                  className="h-48 w-full object-cover"
-                />
-              )}
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <Badge variant="outline" className="mb-2">
-                      {post.category}
-                    </Badge>
-                    <h3 className="font-heading text-lg font-semibold line-clamp-1">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <Card key={post._id} className="overflow-hidden w-full min-w-0">
+                {post.featuredImage && (
+                  <img
+                    src={post.featuredImage}
+                    alt={post.title}
+                    className="h-48 w-full object-cover"
+                  />
+                )}
+                <CardContent className="p-6">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <Badge variant="outline" className="shrink-0">
+                        {post.category}
+                      </Badge>
+                      <Badge variant={post.isPublished ? "default" : "secondary"} className="shrink-0">
+                        {post.isPublished ? "Published" : "Draft"}
+                      </Badge>
+                    </div>
+                    <h3 className="font-heading text-lg font-semibold line-clamp-1 break-words">
                       {post.title}
                     </h3>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 break-words">
                       {post.excerpt}
                     </p>
                   </div>
-                  <Badge variant={post.isPublished ? "default" : "secondary"}>
-                    {post.isPublished ? "Published" : "Draft"}
-                  </Badge>
-                </div>
 
-                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    {post.author}
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <User className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{post.author}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Calendar className="h-4 w-4" />
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {post.tags?.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-muted px-2 py-1 text-xs"
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {post.tags?.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-muted px-2 py-1 text-xs break-all"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => togglePublish(post._id, post.isPublished)}
                     >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                      {post.isPublished ? (
+                        <EyeOff className="mr-2 h-4 w-4" />
+                      ) : (
+                        <Eye className="mr-2 h-4 w-4" />
+                      )}
+                      {post.isPublished ? "Unpublish" : "Publish"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleEdit(post)}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(post._id)}
+                      className="sm:flex-none"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-                <div className="mt-4 flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => togglePublish(post._id, post.isPublished)}
-                  >
-                    {post.isPublished ? (
-                      <EyeOff className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Eye className="mr-2 h-4 w-4" />
-                    )}
-                    {post.isPublished ? "Unpublish" : "Publish"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => handleEdit(post)}
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(post._id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPost ? "Edit Blog Post" : "Create New Blog Post"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Category *</Label>
-                <select
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  required
-                >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Excerpt *</Label>
-              <Textarea
-                value={formData.excerpt}
-                onChange={(e) =>
-                  setFormData({ ...formData, excerpt: e.target.value })
-                }
-                rows={2}
-                placeholder="Brief summary of the post"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Author *</Label>
-              <Input
-                value={formData.author}
-                onChange={(e) =>
-                  setFormData({ ...formData, author: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Featured Image URL (optional)</Label>
-              <Input
-                value={formData.featuredImage}
-                onChange={(e) =>
-                  setFormData({ ...formData, featuredImage: e.target.value })
-                }
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                  placeholder="Add a tag"
-                />
-                <Button type="button" onClick={addTag} variant="outline">
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {defaultTags.map((tag) => (
-                  <Button
-                    key={tag}
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      !formData.tags.includes(tag) &&
-                      setFormData({ ...formData, tags: [...formData.tags, tag] })
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPost ? "Edit Blog Post" : "Create New Blog Post"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <Label>Title *</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
                     }
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2 min-w-0">
+                  <Label>Category *</Label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    required
                   >
-                    + {tag}
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Excerpt *</Label>
+                <Textarea
+                  value={formData.excerpt}
+                  onChange={(e) =>
+                    setFormData({ ...formData, excerpt: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="Brief summary of the post"
+                  required
+                  className="w-full resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Author *</Label>
+                <Input
+                  value={formData.author}
+                  onChange={(e) =>
+                    setFormData({ ...formData, author: e.target.value })
+                  }
+                  required
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Featured Image URL (optional)</Label>
+                <Input
+                  value={formData.featuredImage}
+                  onChange={(e) =>
+                    setFormData({ ...formData, featuredImage: e.target.value })
+                  }
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    placeholder="Add a tag"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addTag} variant="outline" className="shrink-0">
+                    Add
                   </Button>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <button
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {defaultTags.map((tag) => (
+                    <Button
+                      key={tag}
                       type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-destructive"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        !formData.tags.includes(tag) &&
+                        setFormData({ ...formData, tags: [...formData.tags, tag] })
+                      }
                     >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
+                      + {tag}
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Content *</Label>
-              <Textarea
-                value={formData.content}
-                onChange={(e) =>
-                  setFormData({ ...formData, content: e.target.value })
-                }
-                rows={10}
-                className="font-mono text-sm"
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                Supports basic HTML and Markdown formatting
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label>Content *</Label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
+                  rows={10}
+                  className="font-mono text-sm w-full resize-none"
+                  required
+                />
+                <p className="text-sm text-muted-foreground">
+                  Supports basic HTML and Markdown formatting
+                </p>
+              </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isPublished"
-                checked={formData.isPublished}
-                onChange={(e) =>
-                  setFormData({ ...formData, isPublished: e.target.checked })
-                }
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="isPublished" className="cursor-pointer">
-                Publish immediately
-              </Label>
-            </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  checked={formData.isPublished}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isPublished: e.target.checked })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isPublished" className="cursor-pointer">
+                  Publish immediately
+                </Label>
+              </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowModal(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary-gradient">
-                {editingPost ? "Update" : "Publish"} Post
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary-gradient" className="w-full sm:w-auto">
+                  {editingPost ? "Update" : "Publish"} Post
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
