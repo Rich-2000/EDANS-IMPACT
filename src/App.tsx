@@ -17,6 +17,7 @@ import Volunteer from "./pages/Volunteer";
 import Donate from "./pages/Donate";
 import NotFound from "./pages/NotFound";
 
+
 import AdminLogin from "./pages/admin/Login";
 import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -28,6 +29,7 @@ import AdminAbout from "./pages/admin/About";
 import AdminContact from "./pages/admin/Contact";
 import AdminVolunteers from "./pages/admin/Volunteers";
 import AdminDonations from "./pages/admin/Donations";
+import AdminPrograms from "./pages/admin/Programs";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +64,7 @@ const App = () => (
             <Route path="contact" element={<AdminContact />} />
             <Route path="volunteers" element={<AdminVolunteers />} />
             <Route path="donations" element={<AdminDonations />} />
+            <Route path="programs"  element={<AdminPrograms />} />
           </Route>
 
           {/* 404 */}
