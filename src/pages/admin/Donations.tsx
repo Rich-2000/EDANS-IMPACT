@@ -217,181 +217,270 @@ export default function AdminDonations() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground">
-            Donations
-          </h1>
-          <p className="text-muted-foreground">Manage donation records and payments</p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-6 px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
+              Donations
+            </h1>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Manage donation records and payments
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button variant="outline" onClick={exportToCSV} className="w-full sm:w-auto">
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm sm:flex-initial"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="refunded">Refunded</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={exportToCSV}>
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-            <option value="refunded">Refunded</option>
-          </select>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-muted-foreground">Total Donations</p>
+                  <p className="truncate text-2xl font-bold">{donations.length}</p>
+                </div>
+                <div className="ml-3 flex-shrink-0 rounded-full bg-blue-100 p-3">
+                  <DollarSign className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-muted-foreground">Total Amount</p>
+                  <p className="truncate text-2xl font-bold">GH₵ {totalAmount.toFixed(2)}</p>
+                </div>
+                <div className="ml-3 flex-shrink-0 rounded-full bg-green-100 p-3">
+                  <DollarSign className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="truncate text-2xl font-bold">GH₵ {completedAmount.toFixed(2)}</p>
+                </div>
+                <div className="ml-3 flex-shrink-0 rounded-full bg-green-100 p-3">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="truncate text-2xl font-bold">
+                    {donations.filter((d) => d.status === "pending").length}
+                  </p>
+                </div>
+                <div className="ml-3 flex-shrink-0 rounded-full bg-yellow-100 p-3">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Donations</p>
-                <p className="text-2xl font-bold">{donations.length}</p>
-              </div>
-              <div className="rounded-full bg-blue-100 p-3">
-                <DollarSign className="h-6 w-6 text-blue-600" />
-              </div>
+        {/* Donations Table - Desktop View */}
+        <Card className="hidden lg:block">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Donor</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Payment Method</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {donations.map((donation) => (
+                    <TableRow key={donation._id}>
+                      <TableCell>
+                        <div className="font-medium">{donation.donorName}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {donation.donorEmail}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-bold">GH₵ {donation.amount.toFixed(2)}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getPaymentMethodIcon(donation.paymentMethod)}
+                          <span className="capitalize">{donation.paymentMethod}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {donation.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`flex w-24 items-center justify-center gap-2 ${
+                            statusColors[donation.status]
+                          }`}
+                        >
+                          {getStatusIcon(donation.status)}
+                          {donation.status.charAt(0).toUpperCase() +
+                            donation.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(donation.createdAt).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => viewDetails(donation)}
+                          >
+                            View
+                          </Button>
+                          <select
+                            value={donation.status}
+                            onChange={(e) =>
+                              updateStatus(donation._id, e.target.value)
+                            }
+                            className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                            <option value="refunded">Refunded</option>
+                          </select>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold">GH₵ {totalAmount.toFixed(2)}</p>
-              </div>
-              <div className="rounded-full bg-green-100 p-3">
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold">GH₵ {completedAmount.toFixed(2)}</p>
-              </div>
-              <div className="rounded-full bg-green-100 p-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold">
-                  {donations.filter((d) => d.status === "pending").length}
-                </p>
-              </div>
-              <div className="rounded-full bg-yellow-100 p-3">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Donations Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Donor</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Payment Method</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {donations.map((donation) => (
-                <TableRow key={donation._id}>
-                  <TableCell>
-                    <div className="font-medium">{donation.donorName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {donation.donorEmail}
+        {/* Donations Cards - Mobile View */}
+        <div className="space-y-4 lg:hidden">
+          {donations.map((donation) => (
+            <Card key={donation._id} className="w-full">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Donor Info */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{donation.donorName}</p>
+                      <p className="truncate text-sm text-muted-foreground">
+                        {donation.donorEmail}
+                      </p>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-bold">GH₵ {donation.amount.toFixed(2)}</div>
-                  </TableCell>
-                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={`flex-shrink-0 ${statusColors[donation.status]}`}
+                    >
+                      {getStatusIcon(donation.status)}
+                      <span className="ml-1">
+                        {donation.status.charAt(0).toUpperCase() +
+                          donation.status.slice(1)}
+                      </span>
+                    </Badge>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Amount:</span>
+                    <span className="text-lg font-bold">
+                      GH₵ {donation.amount.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Payment Method & Type */}
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {getPaymentMethodIcon(donation.paymentMethod)}
-                      <span className="capitalize">{donation.paymentMethod}</span>
+                      <span className="text-sm capitalize">{donation.paymentMethod}</span>
                     </div>
-                  </TableCell>
-                  <TableCell>
                     <Badge variant="outline" className="capitalize">
                       {donation.type}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
+                  </div>
+
+                  {/* Date */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(donation.createdAt).toLocaleDateString()}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                    <Button
+                      size="sm"
                       variant="outline"
-                      className={`flex w-24 items-center justify-center gap-2 ${
-                        statusColors[donation.status]
-                      }`}
+                      onClick={() => viewDetails(donation)}
+                      className="flex-1"
                     >
-                      {getStatusIcon(donation.status)}
-                      {donation.status.charAt(0).toUpperCase() +
-                        donation.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(donation.createdAt).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => viewDetails(donation)}
-                      >
-                        View
-                      </Button>
-                      <select
-                        value={donation.status}
-                        onChange={(e) =>
-                          updateStatus(donation._id, e.target.value)
-                        }
-                        className="rounded-md border border-input bg-background px-2 py-1 text-xs"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="failed">Failed</option>
-                        <option value="refunded">Refunded</option>
-                      </select>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      View Details
+                    </Button>
+                    <select
+                      value={donation.status}
+                      onChange={(e) =>
+                        updateStatus(donation._id, e.target.value)
+                      }
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="completed">Completed</option>
+                      <option value="failed">Failed</option>
+                      <option value="refunded">Refunded</option>
+                    </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
       {/* Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           {selectedDonation && (
             <>
               <DialogHeader>
@@ -401,24 +490,24 @@ export default function AdminDonations() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Donor Name
                     </h4>
-                    <p className="text-lg">{selectedDonation.donorName}</p>
+                    <p className="mt-1 break-words text-lg">{selectedDonation.donorName}</p>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Donor Email
                     </h4>
-                    <p className="text-lg">{selectedDonation.donorEmail}</p>
+                    <p className="mt-1 break-all text-lg">{selectedDonation.donorEmail}</p>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Amount
                     </h4>
-                    <p className="text-2xl font-bold">
+                    <p className="mt-1 text-2xl font-bold">
                       GH₵ {selectedDonation.amount.toFixed(2)}
                     </p>
                   </div>
@@ -426,13 +515,13 @@ export default function AdminDonations() {
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Currency
                     </h4>
-                    <p className="text-lg">{selectedDonation.currency}</p>
+                    <p className="mt-1 text-lg">{selectedDonation.currency}</p>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Payment Method
                     </h4>
-                    <div className="flex items-center gap-2">
+                    <div className="mt-1 flex items-center gap-2">
                       {getPaymentMethodIcon(selectedDonation.paymentMethod)}
                       <span className="capitalize">{selectedDonation.paymentMethod}</span>
                     </div>
@@ -441,7 +530,7 @@ export default function AdminDonations() {
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Donation Type
                     </h4>
-                    <Badge variant="outline" className="capitalize">
+                    <Badge variant="outline" className="mt-1 capitalize">
                       {selectedDonation.type}
                     </Badge>
                   </div>
@@ -452,7 +541,7 @@ export default function AdminDonations() {
                     <h4 className="text-sm font-medium text-muted-foreground">
                       Transaction ID
                     </h4>
-                    <code className="mt-2 block rounded-lg border border-border bg-muted/20 p-3 font-mono text-sm">
+                    <code className="mt-2 block break-all rounded-lg border border-border bg-muted/20 p-3 font-mono text-sm">
                       {selectedDonation.transactionId}
                     </code>
                   </div>
@@ -462,7 +551,7 @@ export default function AdminDonations() {
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground">Notes</h4>
                     <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4">
-                      <p className="whitespace-pre-wrap">{selectedDonation.notes}</p>
+                      <p className="whitespace-pre-wrap break-words">{selectedDonation.notes}</p>
                     </div>
                   </div>
                 )}
@@ -471,14 +560,16 @@ export default function AdminDonations() {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Current Status
                   </h4>
-                  <div className="mt-2 flex items-center gap-4">
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                     <Badge
                       variant="outline"
-                      className={`text-lg ${statusColors[selectedDonation.status]}`}
+                      className={`w-fit text-lg ${statusColors[selectedDonation.status]}`}
                     >
                       {getStatusIcon(selectedDonation.status)}
-                      {selectedDonation.status.charAt(0).toUpperCase() +
-                        selectedDonation.status.slice(1)}
+                      <span className="ml-1">
+                        {selectedDonation.status.charAt(0).toUpperCase() +
+                          selectedDonation.status.slice(1)}
+                      </span>
                     </Badge>
                     <span className="text-sm text-muted-foreground">
                       Last updated:{" "}
@@ -491,7 +582,7 @@ export default function AdminDonations() {
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Update Status
                   </h4>
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                     <select
                       value={selectedDonation.status}
                       onChange={(e) =>
@@ -509,6 +600,7 @@ export default function AdminDonations() {
                       onClick={() =>
                         (window.location.href = `mailto:${selectedDonation.donorEmail}?subject=Regarding Your Donation`)
                       }
+                      className="w-full sm:w-auto"
                     >
                       <Mail className="mr-2 h-4 w-4" />
                       Thank Donor

@@ -31,6 +31,7 @@ import {
   Download,
   Loader2,
   Filter,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -152,8 +153,15 @@ export default function AdminVolunteers() {
   };
 
   const viewDetails = (volunteer: Volunteer) => {
+    console.log("Opening details for:", volunteer); // Debug log
     setSelectedVolunteer(volunteer);
     setShowDetails(true);
+  };
+
+  const closeDetails = () => {
+    setShowDetails(false);
+    // Small delay before clearing to allow dialog animation
+    setTimeout(() => setSelectedVolunteer(null), 200);
   };
 
   const exportToCSV = () => {
@@ -390,6 +398,7 @@ export default function AdminVolunteers() {
                           onClick={() => viewDetails(volunteer)}
                           className="whitespace-nowrap"
                         >
+                          <Eye className="mr-1 h-3 w-3" />
                           View
                         </Button>
                         <select
@@ -483,7 +492,8 @@ export default function AdminVolunteers() {
                     onClick={() => viewDetails(volunteer)}
                     className="w-full"
                   >
-                    View Details
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Full Details
                   </Button>
                   <select
                     value={volunteer.status}
@@ -503,66 +513,123 @@ export default function AdminVolunteers() {
           ))}
         </div>
 
-        {/* Details Dialog */}
-        <Dialog open={showDetails} onOpenChange={setShowDetails}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
-            {selectedVolunteer && (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="break-words">Volunteer Application Details</DialogTitle>
-                  <DialogDescription className="break-words">
-                    Applied on{" "}
-                    {new Date(selectedVolunteer.createdAt).toLocaleString()}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6">
+        {/* Empty State */}
+        {volunteers.length === 0 && (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <User className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-lg font-medium text-muted-foreground">
+                No volunteer applications found
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {filter !== "all" 
+                  ? "Try changing the filter to see more applications" 
+                  : "Applications will appear here when people apply"}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Details Dialog */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+          {selectedVolunteer ? (
+            <>
+              <DialogHeader className="space-y-3">
+                <DialogTitle className="text-2xl font-bold break-words">
+                  Volunteer Application Details
+                </DialogTitle>
+                <DialogDescription className="text-base break-words">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span>
+                      Applied on {new Date(selectedVolunteer.createdAt).toLocaleDateString()} at{" "}
+                      {new Date(selectedVolunteer.createdAt).toLocaleTimeString()}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={`w-fit ${statusColors[selectedVolunteer.status]}`}
+                    >
+                      {getStatusIcon(selectedVolunteer.status)}
+                      <span className="ml-1">
+                        {selectedVolunteer.status.charAt(0).toUpperCase() +
+                          selectedVolunteer.status.slice(1)}
+                      </span>
+                    </Badge>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 mt-4">
+                {/* Personal Information */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Personal Information
+                  </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
                         Full Name
                       </h4>
-                      <p className="text-lg break-words">
+                      <p className="text-base font-medium break-words">
                         {selectedVolunteer.firstName} {selectedVolunteer.lastName}
                       </p>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
                         Date of Birth
                       </h4>
-                      <p className="text-lg break-words">
+                      <p className="text-base break-words">
                         {new Date(selectedVolunteer.dateOfBirth).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Email
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Email Address
                       </h4>
-                      <p className="text-lg break-all">{selectedVolunteer.email}</p>
+                      <p className="text-base break-all">{selectedVolunteer.email}</p>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Phone
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Phone Number
                       </h4>
-                      <p className="text-lg break-words">{selectedVolunteer.phone}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Occupation
-                      </h4>
-                      <p className="text-lg break-words">{selectedVolunteer.occupation}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Education
-                      </h4>
-                      <p className="text-lg break-words">{selectedVolunteer.education}</p>
+                      <p className="text-base break-words">{selectedVolunteer.phone}</p>
                     </div>
                   </div>
+                </div>
 
+                {/* Professional Information */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Professional Background
+                  </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">Skills</h4>
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Current Occupation
+                      </h4>
+                      <p className="text-base break-words">{selectedVolunteer.occupation}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Education Level
+                      </h4>
+                      <p className="text-base break-words">{selectedVolunteer.education}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skills and Availability */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h3 className="text-lg font-semibold mb-4">Skills & Availability</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                        Skills
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
                         {selectedVolunteer.skills.map((skill) => (
                           <Badge key={skill} variant="secondary" className="break-words">
                             {skill}
@@ -571,10 +638,10 @@ export default function AdminVolunteers() {
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Availability
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                        Available Days
                       </h4>
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {selectedVolunteer.availability.map((day) => (
                           <Badge key={day} variant="outline" className="break-words">
                             {day}
@@ -583,71 +650,85 @@ export default function AdminVolunteers() {
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Motivation
-                    </h4>
-                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
-                      <p className="whitespace-pre-wrap break-words">{selectedVolunteer.motivation}</p>
-                    </div>
-                  </div>
-
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Experience
-                    </h4>
-                    <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
-                      <p className="whitespace-pre-wrap break-words">{selectedVolunteer.experience}</p>
-                    </div>
-                  </div>
-
-                  {selectedVolunteer.notes && (
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-medium text-muted-foreground">
-                        Admin Notes
-                      </h4>
-                      <div className="mt-2 rounded-lg border border-border bg-muted/20 p-4 overflow-hidden">
-                        <p className="whitespace-pre-wrap break-words">{selectedVolunteer.notes}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Update Status
-                    </h4>
-                    <div className="mt-2 flex flex-col sm:flex-row gap-2">
-                      <select
-                        value={selectedVolunteer.status}
-                        onChange={(e) =>
-                          updateStatus(selectedVolunteer._id, e.target.value)
-                        }
-                        className="flex-1 rounded-md border border-input bg-background px-3 py-2 min-w-0"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="reviewed">Reviewed</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          (window.location.href = `mailto:${selectedVolunteer.email}`)
-                        }
-                        className="whitespace-nowrap"
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Contact Volunteer
-                      </Button>
-                    </div>
+                {/* Motivation */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                    Why They Want to Volunteer
+                  </h4>
+                  <div className="mt-2 rounded-lg bg-background p-4 overflow-hidden">
+                    <p className="whitespace-pre-wrap break-words text-base leading-relaxed">
+                      {selectedVolunteer.motivation}
+                    </p>
                   </div>
                 </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+
+                {/* Experience */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                    Previous Volunteer Experience
+                  </h4>
+                  <div className="mt-2 rounded-lg bg-background p-4 overflow-hidden">
+                    <p className="whitespace-pre-wrap break-words text-base leading-relaxed">
+                      {selectedVolunteer.experience}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Admin Notes */}
+                {selectedVolunteer.notes && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <h4 className="text-sm font-medium text-amber-900 mb-2">
+                      Admin Notes
+                    </h4>
+                    <div className="mt-2 rounded-lg bg-white p-4 overflow-hidden">
+                      <p className="whitespace-pre-wrap break-words text-base leading-relaxed text-amber-900">
+                        {selectedVolunteer.notes}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                    Application Actions
+                  </h4>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <select
+                      value={selectedVolunteer.status}
+                      onChange={(e) =>
+                        updateStatus(selectedVolunteer._id, e.target.value)
+                      }
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 min-w-0"
+                    >
+                      <option value="pending">Pending Review</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="approved">Approve Application</option>
+                      <option value="rejected">Reject Application</option>
+                    </select>
+                    <Button
+                      variant="default"
+                      onClick={() =>
+                        (window.location.href = `mailto:${selectedVolunteer.email}?subject=Regarding Your Volunteer Application`)
+                      }
+                      className="whitespace-nowrap"
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      Contact Applicant
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
