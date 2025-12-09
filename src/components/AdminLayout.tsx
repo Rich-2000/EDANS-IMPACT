@@ -15,6 +15,7 @@ import {
   Info,
   Trophy,
   Menu,
+  Target,
   X,
 } from "lucide-react";
 import logo from "@/assets/images/logo.png";
@@ -30,6 +31,7 @@ const navigation = [
   { name: "Contact", href: "/admin/contact", icon: Mail },
   { name: "Volunteers", href: "/admin/volunteers", icon: Users },
   { name: "Donations", href: "/admin/donations", icon: Heart },
+  { name: "Mission & Impact", href: "/admin/mission-impact", icon: Target },
 ];
 
 export default function AdminLayout() {

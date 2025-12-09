@@ -11,86 +11,103 @@ import {
   TrendingUp,
   MapPin,
   Award,
-  Quote
+  Quote,
+  Target as TargetIcon,
+  Globe,
+  Zap
 } from "lucide-react";
 
 // Fallback data
-const fallbackImpactMetrics = [
-  {
-    number: "2,500+",
-    label: "Students Reached",
-    description: "Young minds engaged through our various programs",
-    icon: GraduationCap,
-    color: "primary",
-  },
-  {
-    number: "50+",
-    label: "Programs Delivered",
-    description: "Workshops, summits, and training sessions completed",
-    icon: Lightbulb,
-    color: "secondary",
-  },
-  {
-    number: "100+",
-    label: "Volunteers",
-    description: "Dedicated individuals contributing their time",
-    icon: Users,
-    color: "accent",
-  },
-  {
-    number: "25+",
-    label: "Partner Schools",
-    description: "Educational institutions across Ghana",
-    icon: MapPin,
-    color: "primary",
-  },
-  {
-    number: "85%",
-    label: "Skill Improvement",
-    description: "Students reporting improved problem-solving skills",
-    icon: TrendingUp,
-    color: "secondary",
-  },
-  {
-    number: "15+",
-    label: "Awards Won",
-    description: "Recognition for student innovations",
-    icon: Award,
-    color: "accent",
-  },
-];
+const fallbackData = {
+  missionStatement: 'To promote innovation, empower young people, and provide educational and developmental opportunities that help individuals identify challenges, create solutions, and improve their social and economic well-being.',
+  visionStatement: 'A society where young people become innovative thinkers who create sustainable solutions for their communities, driving positive change across Ghana and beyond.',
+  impactMetrics: [
+    {
+      number: "2,500+",
+      label: "Students Reached",
+      description: "Young minds engaged through our various programs",
+      icon: "GraduationCap",
+      color: "primary",
+    },
+    {
+      number: "50+",
+      label: "Programs Delivered",
+      description: "Workshops, summits, and training sessions completed",
+      icon: "Lightbulb",
+      color: "secondary",
+    },
+    {
+      number: "100+",
+      label: "Volunteers",
+      description: "Dedicated individuals contributing their time",
+      icon: "Users",
+      color: "accent",
+    },
+    {
+      number: "25+",
+      label: "Partner Schools",
+      description: "Educational institutions across Ghana",
+      icon: "MapPin",
+      color: "primary",
+    },
+    {
+      number: "85%",
+      label: "Skill Improvement",
+      description: "Students reporting improved problem-solving skills",
+      icon: "TrendingUp",
+      color: "secondary",
+    },
+    {
+      number: "15+",
+      label: "Awards Won",
+      description: "Recognition for student innovations",
+      icon: "Award",
+      color: "accent",
+    },
+  ],
+  successStories: [
+    {
+      name: "Kofi Mensah",
+      school: "Achimota School",
+      story: "After participating in our Innovation Summit, Kofi developed a solar-powered water purification system that is now being piloted in his community.",
+      quote: "Edans Impact showed me that my ideas can change lives. I never thought a student like me could create something so meaningful.",
+    },
+    {
+      name: "Akua Addo",
+      school: "Wesley Girls' High School",
+      story: "Through our STEM workshops, Akua discovered her passion for coding and has since created an app that helps farmers predict weather patterns.",
+      quote: "The mentorship I received helped me believe in myself and pursue my dreams in technology.",
+    },
+    {
+      name: "Yaw Boateng",
+      school: "Prempeh College",
+      story: "Yaw's recycling initiative, developed during our Environmental Summit, has been adopted by three schools in the Ashanti Region.",
+      quote: "Edans Impact taught me that innovation isn't just about technology – it's about solving real problems in our communities.",
+    },
+  ],
+  sdgAlignments: [
+    { number: 4, title: "Quality Education", color: "bg-red-500" },
+    { number: 8, title: "Decent Work & Economic Growth", color: "bg-rose-600" },
+    { number: 9, title: "Industry, Innovation & Infrastructure", color: "bg-orange-500" },
+    { number: 10, title: "Reduced Inequalities", color: "bg-pink-500" },
+  ],
+};
 
-const fallbackSuccessStories = [
-  {
-    name: "Kofi Mensah",
-    school: "Achimota School",
-    story: "After participating in our Innovation Summit, Kofi developed a solar-powered water purification system that is now being piloted in his community.",
-    quote: "Edans Impact showed me that my ideas can change lives. I never thought a student like me could create something so meaningful.",
-  },
-  {
-    name: "Akua Addo",
-    school: "Wesley Girls' High School",
-    story: "Through our STEM workshops, Akua discovered her passion for coding and has since created an app that helps farmers predict weather patterns.",
-    quote: "The mentorship I received helped me believe in myself and pursue my dreams in technology.",
-  },
-  {
-    name: "Yaw Boateng",
-    school: "Prempeh College",
-    story: "Yaw's recycling initiative, developed during our Environmental Summit, has been adopted by three schools in the Ashanti Region.",
-    quote: "Edans Impact taught me that innovation isn't just about technology – it's about solving real problems in our communities.",
-  },
-];
-
-const sdgAlignments = [
-  { number: 4, title: "Quality Education", color: "bg-red-500" },
-  { number: 8, title: "Decent Work & Economic Growth", color: "bg-rose-600" },
-  { number: 9, title: "Industry, Innovation & Infrastructure", color: "bg-orange-500" },
-  { number: 10, title: "Reduced Inequalities", color: "bg-pink-500" },
-];
+const iconComponents: Record<string, React.ElementType> = {
+  GraduationCap,
+  Lightbulb,
+  Users,
+  MapPin,
+  TrendingUp,
+  Award,
+  Heart,
+  Target: TargetIcon,
+  BookOpen: Globe,
+  Zap,
+};
 
 export default function MissionImpact() {
-  const [impactMetrics, setImpactMetrics] = useState(fallbackImpactMetrics);
-  const [successStories, setSuccessStories] = useState(fallbackSuccessStories);
+  const [data, setData] = useState(fallbackData);
   const [isLoading, setIsLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -99,42 +116,23 @@ export default function MissionImpact() {
       try {
         setIsLoading(true);
         
-        // Fetch impact data from multiple sources
-        const [programsResponse, eventsResponse, aboutResponse] = await Promise.all([
-          fetch("https://edans-impact-backend.onrender.com/api/programs"),
-          fetch("https://edans-impact-backend.onrender.com/api/events"),
-          fetch("https://edans-impact-backend.onrender.com/api/about")
-        ]);
+        const response = await fetch("https://edans-impact-backend.onrender.com/api/mission-impact");
         
-        if (programsResponse.ok && eventsResponse.ok) {
-          const programsData = await programsResponse.json();
-          const eventsData = await eventsResponse.json();
-          const aboutData = aboutResponse.ok ? await aboutResponse.json() : null;
+        if (response.ok) {
+          const result = await response.json();
           
-          // Update impact metrics based on real data
-          const updatedMetrics = [...fallbackImpactMetrics];
-          updatedMetrics[0].number = `${Math.floor(programsData.count * 50)}+`; // Estimate students
-          updatedMetrics[1].number = `${programsData.count}+`; // Programs count
-          updatedMetrics[2].number = "100+"; // Fixed for now
-          updatedMetrics[3].number = `${Math.floor(programsData.count / 2)}+`; // Estimate schools
-          
-          setImpactMetrics(updatedMetrics);
-          
-          // Update success stories if available from about data
-          if (aboutData?.data?.team) {
-            const teamStories = aboutData.data.team.slice(0, 3).map((member: any, index: number) => ({
-              name: member.name,
-              school: ["Achimota School", "Wesley Girls' High School", "Prempeh College"][index],
-              story: `${member.name} joined our team as ${member.role} and has been instrumental in our mission.`,
-              quote: fallbackSuccessStories[index].quote
-            }));
-            
-            if (teamStories.length > 0) {
-              setSuccessStories(teamStories);
-            }
+          if (!result.isFallback && result.data) {
+            setData({
+              missionStatement: result.data.missionStatement || fallbackData.missionStatement,
+              visionStatement: result.data.visionStatement || fallbackData.visionStatement,
+              impactMetrics: result.data.impactMetrics || fallbackData.impactMetrics,
+              successStories: result.data.successStories || fallbackData.successStories,
+              sdgAlignments: result.data.sdgAlignments || fallbackData.sdgAlignments,
+            });
+            setUsingFallback(false);
+          } else {
+            setUsingFallback(true);
           }
-          
-          setUsingFallback(false);
         } else {
           setUsingFallback(true);
         }
@@ -176,7 +174,6 @@ export default function MissionImpact() {
               Creating lasting change in the lives of Ghana's youth through 
               innovation, education, and empowerment.
             </p>
-            
           </div>
         </div>
         
@@ -197,15 +194,13 @@ export default function MissionImpact() {
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="rounded-3xl bg-gradient-primary p-8 lg:p-12">
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-foreground/20">
-                <Target className="h-7 w-7 text-primary-foreground" />
+                <TargetIcon className="h-7 w-7 text-primary-foreground" />
               </div>
               <h2 className="font-heading text-2xl font-bold text-primary-foreground lg:text-3xl">
                 Our Mission
               </h2>
               <p className="mt-4 text-lg text-primary-foreground/90">
-                To promote innovation, empower young people, and provide educational 
-                and developmental opportunities that help individuals identify challenges, 
-                create solutions, and improve their social and economic well-being.
+                {data.missionStatement}
               </p>
             </div>
             
@@ -217,9 +212,7 @@ export default function MissionImpact() {
                 Our Vision
               </h2>
               <p className="mt-4 text-lg text-secondary-foreground/90">
-                A society where young people become innovative thinkers who create 
-                sustainable solutions for their communities, driving positive change 
-                across Ghana and beyond.
+                {data.visionStatement}
               </p>
             </div>
           </div>
@@ -242,29 +235,32 @@ export default function MissionImpact() {
           </div>
           
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {impactMetrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="group rounded-2xl border border-border bg-card p-6 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-heading text-4xl font-bold text-primary">
-                      {metric.number}
+            {data.impactMetrics.map((metric, index) => {
+              const IconComponent = iconComponents[metric.icon] || GraduationCap;
+              return (
+                <div
+                  key={`${metric.label}-${index}`}
+                  className="group rounded-2xl border border-border bg-card p-6 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-heading text-4xl font-bold text-primary">
+                        {metric.number}
+                      </div>
+                      <div className="mt-1 font-semibold text-foreground">
+                        {metric.label}
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {metric.description}
+                      </p>
                     </div>
-                    <div className="mt-1 font-semibold text-foreground">
-                      {metric.label}
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-hero text-primary-foreground">
+                      <IconComponent className="h-6 w-6" />
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {metric.description}
-                    </p>
-                  </div>
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-hero text-primary-foreground">
-                    <metric.icon className="h-6 w-6" />
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -282,9 +278,9 @@ export default function MissionImpact() {
           </div>
           
           <div className="mt-12 grid gap-8 lg:grid-cols-3">
-            {successStories.map((story) => (
+            {data.successStories.map((story, index) => (
               <div
-                key={story.name}
+                key={`${story.name}-${index}`}
                 className="group rounded-2xl border border-border bg-card p-6 shadow-md transition-all duration-300 hover:shadow-xl"
               >
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-hero text-xl font-bold text-primary-foreground">
@@ -325,9 +321,9 @@ export default function MissionImpact() {
           </div>
           
           <div className="mt-12 flex flex-wrap justify-center gap-4">
-            {sdgAlignments.map((sdg) => (
+            {data.sdgAlignments.map((sdg, index) => (
               <div
-                key={sdg.number}
+                key={`sdg-${sdg.number}-${index}`}
                 className={`flex items-center gap-3 rounded-xl ${sdg.color} px-6 py-4 text-white`}
               >
                 <span className="font-heading text-2xl font-bold">SDG {sdg.number}</span>
